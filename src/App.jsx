@@ -1,903 +1,249 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  Bell,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  CircleCheck,
-  Coffee,
-  Croissant,
-  Home,
-  Popcorn,
-  ListFilter,
-  PackageCheck,
-  Search,
-  ShoppingBag,
-  Star,
-  Utensils,
-  UserRound
-} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
-const products = [
-  {
-    id: 1,
-    name: "Light Day Salad Bowl",
-    category: "fresh",
-    categoryLabel: "Fresh",
-    price: 8900,
-    oldPrice: 10900,
-    badge: "BEST",
-    symptom: "Bloating",
-    tags: ["Low sodium", "High fiber", "Breakfast"],
-    rating: 4.8,
-    image:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=700&q=80",
-    description: "A gentle meal with brown rice, chickpeas, and seasonal greens."
-  },
-  {
-    id: 2,
-    name: "Unsweetened Greek Yogurt Set",
-    category: "dairy",
-    categoryLabel: "Dairy",
-    price: 7200,
-    oldPrice: 8200,
-    badge: "15%",
-    symptom: "Sensitive stomach",
-    tags: ["Protein", "Probiotic", "Snack"],
-    rating: 4.7,
-    image:
-      "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=700&q=80",
-    description: "Plain yogurt with less sugar and a longer-lasting feeling of fullness."
-  },
-  {
-    id: 3,
-    name: "Low-Sugar Oat Granola",
-    category: "snack",
-    categoryLabel: "Snack",
-    price: 6500,
-    oldPrice: 7900,
-    badge: "NEW",
-    symptom: "Post-meal slump",
-    tags: ["Low sugar", "Oat", "Crunchy"],
-    rating: 4.6,
-    image:
-      "https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?auto=format&fit=crop&w=700&q=80",
-    description: "Nutty grains and oats bring texture without heavy added sugar."
-  },
-  {
-    id: 4,
-    name: "Cleanse Green Juice",
-    category: "drink",
-    categoryLabel: "Drink",
-    price: 5400,
-    oldPrice: 6200,
-    badge: "HOT",
-    symptom: "Water retention",
-    tags: ["Kale", "Apple", "Cold-pressed"],
-    rating: 4.9,
-    image:
-      "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?auto=format&fit=crop&w=700&q=80",
-    description: "A crisp green juice with fresh vegetables and soft fruit acidity."
-  },
-  {
-    id: 5,
-    name: "Chicken Brown Rice Bowl",
-    category: "meal",
-    categoryLabel: "Meal",
-    price: 9900,
-    oldPrice: 11900,
-    badge: "FILLING",
-    symptom: "Sensitive stomach",
-    tags: ["High protein", "Microwave", "Lunch"],
-    rating: 4.8,
-    image:
-      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=700&q=80",
-    description: "A balanced bowl with tender chicken breast and mixed grains."
-  },
-  {
-    id: 6,
-    name: "Low-Sodium Miso Soup Kit",
-    category: "meal",
-    categoryLabel: "Meal",
-    price: 7600,
-    oldPrice: 8900,
-    badge: "WARM",
-    symptom: "Bloating",
-    tags: ["Low sodium", "Soup", "Ready meal"],
-    rating: 4.5,
-    image:
-      "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=700&q=80",
-    description: "A comforting miso soup with less sodium and deep savory flavor."
-  },
-  {
-    id: 7,
-    name: "Basil Tomato Pasta",
-    category: "meal",
-    categoryLabel: "Meal",
-    price: 10800,
-    oldPrice: 12800,
-    badge: "PICK",
-    symptom: "Post-meal slump",
-    tags: ["Whole wheat", "Tomato", "Weekend"],
-    rating: 4.7,
-    image:
-      "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=700&q=80",
-    description: "A lighter pasta with whole-wheat noodles and bright tomato sauce."
-  },
-  {
-    id: 8,
-    name: "Lemon Mint Sparkling Water",
-    category: "drink",
-    categoryLabel: "Drink",
-    price: 3900,
-    oldPrice: 4500,
-    badge: "0kcal",
-    symptom: "Water retention",
-    tags: ["Unsweetened", "Refreshing", "Hydration"],
-    rating: 4.6,
-    image:
-      "https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=700&q=80",
-    description: "A crisp sparkling water with lemon and mint, and no added sugar."
-  }
+const figma = (name) => `/figma/${name}`;
+
+const screens = {
+  splash: { src: figma("splash.png"), width: 390, nav: false },
+  onboarding1: { src: figma("onboarding-1.png"), width: 390, nav: false },
+  onboarding2: { src: figma("onboarding-2.png"), width: 390, nav: false },
+  onboarding3: { src: figma("onboarding-3.png"), width: 390, nav: false },
+  onboarding4: { src: figma("onboarding-4.png"), width: 390, nav: false },
+  home: { src: figma("home-products.png"), width: 390, nav: true },
+  product: { src: figma("product-detail.png"), width: 390, nav: false },
+  search: { src: figma("search.png"), width: 388, nav: true },
+  searchCustom1: { src: figma("search-custom-1.png"), width: 388, nav: true },
+  searchCustom2: { src: figma("search-custom-2.png"), width: 388, nav: true },
+  searchCustom3: { src: figma("search-custom-3.png"), width: 388, nav: true },
+  searchCustom4: { src: figma("search-custom-4.png"), width: 388, nav: true },
+  category: { src: figma("category-main.png"), width: 388, nav: true },
+  categoryDetail: { src: figma("category-detail.png"), width: 388, nav: true },
+  categoryExpanded: { src: figma("category-expanded.png"), width: 388, nav: true },
+  delivery: { src: figma("delivery.png"), width: 388, nav: true },
+  my: { src: figma("my-page.png"), width: 388, nav: true },
+  myDetail: { src: figma("my-detail.png"), width: 388, nav: true },
+  review1: { src: figma("review-1.png"), width: 390, nav: false },
+  review2: { src: figma("review-2.png"), width: 390, nav: false },
+  review3: { src: figma("review-3.png"), width: 390, nav: false },
+  review4: { src: figma("review-4.png"), width: 390, nav: false },
+  review5: { src: figma("review-5.png"), width: 390, nav: false }
+};
+
+const tabs = [
+  { id: "home", label: "Home", x: 21, y: 13, w: 43, h: 54 },
+  { id: "delivery", label: "Delivery", x: 95, y: 13, w: 47, h: 54 },
+  { id: "category", label: "Categories", x: 166, y: 13, w: 61, h: 54 },
+  { id: "search", label: "Search", x: 246, y: 13, w: 48, h: 54 },
+  { id: "my", label: "MyPage", x: 318, y: 13, w: 52, h: 54 }
 ];
-
-const categories = [
-  { id: "meal", name: "Meal Care", detail: "Bowls, soups, pasta", icon: "M" },
-  { id: "fresh", name: "Fresh Bowl", detail: "Salads, fruit, vegetables", icon: "F" },
-  { id: "drink", name: "Hydration", detail: "Juice, sparkling water, tea", icon: "H" },
-  { id: "dairy", name: "Dairy & Protein", detail: "Yogurt, cheese, protein", icon: "D" },
-  { id: "snack", name: "Light Snack", detail: "Granola, nuts, snacks", icon: "S" }
-];
-
-const keywordChips = ["Low sugar", "Low sodium", "High protein", "Fiber", "Breakfast", "Snack", "Juice", "Microwave"];
-const symptoms = ["All", "Bloating", "Sensitive stomach", "Water retention", "Post-meal slump"];
-
-function formatPrice(price) {
-  return `$${(price / 1000).toFixed(2)}`;
-}
 
 function App() {
-  const [stage, setStage] = useState("splash");
-  const [onboardingStep, setOnboardingStep] = useState(0);
-  const [selectedGoals, setSelectedGoals] = useState(["Bloating"]);
-  const [onboardingChoices, setOnboardingChoices] = useState({
-    intolerance: "Gluten intolerance",
-    severity: "Moderate",
-    cause: "Cafe"
-  });
-  const [activeTab, setActiveTab] = useState("home");
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [screen, setScreen] = useState("splash");
+  const [overlay, setOverlay] = useState(null);
   const [toast, setToast] = useState("");
-  const [buyProduct, setBuyProduct] = useState(null);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setStage("onboarding"), 1200);
+    const timer = window.setTimeout(() => setScreen("onboarding1"), 1200);
     return () => window.clearTimeout(timer);
   }, []);
 
-  function showToast(message) {
-    setToast(message);
-    window.setTimeout(() => setToast(""), 1800);
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    window.scrollTo(0, 0);
+    setOverlay(null);
+  }, [screen]);
+
+  function go(nextScreen) {
+    setScreen(nextScreen);
   }
 
-  function openBuyModal(product) {
-    setToast("");
-    setBuyProduct(product);
+  function addToCart() {
+    setToast("Added to cart");
+    window.setTimeout(() => setToast(""), 1600);
   }
 
-  const sharedProps = {
-    products,
-    onOpenProduct: setSelectedProduct,
-    onToast: showToast,
-    onBuy: openBuyModal
-  };
-
-  let content;
-  if (stage === "splash") {
-    content = <SplashScreen />;
-  } else if (stage === "onboarding") {
-    content = (
-      <Onboarding
-        step={onboardingStep}
-        choices={onboardingChoices}
-        onSelectChoice={(key, value) => setOnboardingChoices((current) => ({ ...current, [key]: value }))}
-        onNext={() => {
-          if (onboardingStep < 3) setOnboardingStep((step) => step + 1);
-          else setStage("app");
-        }}
-      />
-    );
-  } else if (selectedProduct) {
-    content = (
-      <ProductDetail
-        product={selectedProduct}
-        products={products}
-        onBack={() => setSelectedProduct(null)}
-        onOpenProduct={setSelectedProduct}
-        onToast={showToast}
-        onBuy={openBuyModal}
-      />
-    );
-  } else {
-    content = (
-      <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
-        {activeTab === "home" && <HomeScreen {...sharedProps} goals={selectedGoals} />}
-        {activeTab === "delivery" && <DeliveryScreen onToast={showToast} />}
-        {activeTab === "category" && <CategoryScreen {...sharedProps} />}
-        {activeTab === "search" && <SearchScreen {...sharedProps} />}
-        {activeTab === "my" && (
-          <MyPage
-            goals={selectedGoals}
-            onReset={() => {
-              setOnboardingStep(0);
-              setStage("onboarding");
-            }}
-            onToast={showToast}
-          />
-        )}
-      </AppShell>
-    );
-  }
+  const current = screens[screen];
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-6">
-      <section className="relative h-[844px] w-[390px] overflow-hidden rounded-[32px] border border-[#d6e3d8] bg-white shadow-phone">
-        {content}
-        {toast && (
-          <div className="absolute bottom-24 left-5 right-5 z-50 rounded-lg bg-[#142016] px-4 py-3 text-center text-sm font-semibold text-white shadow-soft">
-            {toast}
-          </div>
-        )}
-        {buyProduct && <BuyModal product={buyProduct} onClose={() => setBuyProduct(null)} />}
+    <main className="flex min-h-screen items-start justify-center bg-[#f2f2f2] px-4 py-6">
+      <section className="relative h-[844px] w-[390px] overflow-hidden bg-white shadow-phone">
+        <div ref={scrollRef} className="hide-scrollbar h-full overflow-y-auto">
+          <FigmaScreen screen={current} />
+        </div>
+
+        <Hotspots screen={screen} go={go} addToCart={addToCart} setOverlay={setOverlay} />
+
+        {current.nav && <BottomNav go={go} />}
+
+        {toast && <Toast>{toast}</Toast>}
+        {overlay === "cart" && <ImageSheet src={figma("cart-overlay.png")} height={377} onClose={() => setOverlay(null)} />}
+        {overlay === "buy" && <ImageSheet src={figma("buy-modal.png")} height={657} onClose={() => setOverlay(null)} />}
+        {overlay === "date" && <ImageSheet src={figma("date-picker.png")} height={660} width={398} onClose={() => setOverlay(null)} />}
       </section>
     </main>
   );
 }
 
-function SplashScreen() {
+function FigmaScreen({ screen }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center bg-leaf-600 text-white">
-      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15">
-        <span className="text-4xl font-black">n</span>
-      </div>
-      <h1 className="text-2xl font-black tracking-normal">NoBloat</h1>
-      <p className="mt-2 text-sm text-white/80">healthy delivery for lighter days</p>
-    </div>
+    <img
+      src={screen.src}
+      alt=""
+      draggable="false"
+      className="mx-auto block select-none"
+      style={{ width: `${screen.width}px` }}
+    />
   );
 }
 
-function Onboarding({ step, choices, onSelectChoice, onNext }) {
-  const typeOptions = ["Gluten intolerance", "Both", "Lactose intolerance"];
-  const severityOptions = ["Mild", "Moderate", "Severe"];
-  const causeOptions = [
-    { label: "Cafe", icon: Coffee },
-    { label: "Bakery", icon: Croissant },
-    { label: "Restaurant", icon: Utensils },
-    { label: "Snack", icon: Popcorn }
+function Hotspots({ screen, go, addToCart, setOverlay }) {
+  const productHotspots = [
+    { x: 16, y: 142, w: 158, h: 118 },
+    { x: 215, y: 142, w: 158, h: 118 },
+    { x: 16, y: 347, w: 158, h: 118 },
+    { x: 215, y: 347, w: 158, h: 118 }
   ];
 
-  if (step === 0) {
-    return (
-      <div className="flex h-full flex-col bg-white">
-        <section className="relative h-[314px] overflow-hidden bg-leaf-600 px-8 pt-12 text-center text-white">
-          <div className="mx-auto mt-1 flex h-14 w-60 items-center justify-center rounded-lg bg-[#26a734]">
-            <h1 className="text-2xl font-black tracking-normal">NoBloat</h1>
-          </div>
-          <p className="mt-11 text-sm font-medium text-white/75">Food-Allergy-Tailored Shopping</p>
-          <p className="mt-6 text-sm font-medium text-white/75">We will find you the trusty meal!</p>
-          <div className="absolute -bottom-11 left-[-10%] h-24 w-[120%] rounded-[50%] bg-white" />
-        </section>
+  const cartHotspots = [
+    { x: 33, y: 264, w: 121, h: 29 },
+    { x: 232, y: 264, w: 121, h: 29 },
+    { x: 33, y: 469, w: 121, h: 29 },
+    { x: 232, y: 469, w: 121, h: 29 }
+  ];
 
-        <section className="flex flex-1 flex-col items-center px-9 pb-20 pt-24 text-center">
-          <h2 className="text-lg font-black leading-6 text-neutral-800">Registration<br />Complete!</h2>
-          <p className="mt-4 text-sm leading-6 text-neutral-500">
-            We'll guide you to set up the symptom profiles to find the food that you would like.
-          </p>
-          <div className="mt-auto w-full">
-            <p className="mb-1 text-base font-medium text-leaf-600">Start !</p>
-            <button
-              onClick={onNext}
-              className="flex h-12 w-full items-center justify-center rounded-[18px] bg-leaf-600 text-base font-black text-white shadow-soft focus:outline-none"
-            >
-              Custom Settings
-            </button>
-          </div>
-        </section>
-      </div>
-    );
-  }
-
-  const title = step === 1 ? "Types of Symptoms" : step === 2 ? "Severity of Symptoms" : "Main Cause";
-  const progress = step === 1 ? "34%" : step === 2 ? "68%" : "100%";
-
-  return (
-    <div className="flex h-full flex-col bg-white">
-      <OnboardingHeader title={title} step={step} progress={progress} />
-      <section className="flex flex-1 flex-col px-10 pb-20 pt-20">
-        {step === 1 && (
-          <>
-            <h2 className="text-center text-sm font-black text-leaf-600">Select the type of intolerance</h2>
-            <div className="mt-9 space-y-8">
-              {typeOptions.map((option) => (
-                <OnboardingChoiceButton
-                  key={option}
-                  label={option}
-                  selected={choices.intolerance === option}
-                  onClick={() => onSelectChoice("intolerance", option)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            <h2 className="text-center text-sm font-black text-leaf-600">Select the severity of intolerance</h2>
-            <div className="mt-9 space-y-8">
-              {severityOptions.map((option) => (
-                <OnboardingChoiceButton
-                  key={option}
-                  label={option}
-                  selected={choices.severity === option}
-                  onClick={() => onSelectChoice("severity", option)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {step === 3 && (
-          <>
-            <h2 className="text-center text-sm font-black text-leaf-600">Where do you usually eat food?</h2>
-            <div className="mt-7 grid grid-cols-2 gap-3">
-              {causeOptions.map(({ label, icon: Icon }) => {
-                const selected = choices.cause === label;
-                return (
-                  <button
-                    key={label}
-                    onClick={() => onSelectChoice("cause", label)}
-                    className={`flex h-[108px] flex-col items-center justify-center rounded-[18px] border-2 text-sm font-black transition focus:outline-none ${
-                      selected ? "border-leaf-600 bg-leaf-100 text-leaf-700" : "border-leaf-600 bg-white text-leaf-700"
-                    }`}
-                  >
-                    <Icon size={30} strokeWidth={1.8} className="mb-4 text-leaf-600" />
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        )}
-
-        <button
-          onClick={onNext}
-          className="mt-auto flex h-12 items-center justify-center rounded-[18px] bg-leaf-600 text-base font-black text-white shadow-soft focus:outline-none"
-        >
-          {step === 3 ? "Complete" : "Next"}
-        </button>
-      </section>
-    </div>
-  );
-}
-
-function OnboardingHeader({ title, step, progress }) {
   return (
     <>
-      <header className="flex h-[120px] items-center justify-center bg-leaf-600 px-8 pt-3 text-center text-white">
-        <h1 className="text-2xl font-black tracking-normal">{title}</h1>
-      </header>
-      <div className="px-11 pt-11 text-center">
-        <div className="h-2 rounded-full bg-[#dff8e3]">
-          <div className="h-2 rounded-full bg-leaf-600" style={{ width: progress }} />
-        </div>
-        <p className="mt-2 text-[10px] font-black text-leaf-600">Step {step}</p>
-      </div>
+      {screen === "onboarding1" && <Hotspot label="Custom Settings" x={74} y={697} w={244} h={49} onClick={() => go("onboarding2")} />}
+      {screen === "onboarding2" && (
+        <>
+          <Hotspot label="Select intolerance" x={74} y={389} w={242} h={210} onClick={() => undefined} />
+          <Hotspot label="Next onboarding step" x={75} y={697} w={240} h={49} onClick={() => go("onboarding3")} />
+        </>
+      )}
+      {screen === "onboarding3" && (
+        <>
+          <Hotspot label="Select severity" x={83} y={390} w={224} h={210} onClick={() => undefined} />
+          <Hotspot label="Next onboarding step" x={75} y={697} w={240} h={49} onClick={() => go("onboarding4")} />
+        </>
+      )}
+      {screen === "onboarding4" && (
+        <>
+          <Hotspot label="Select main cause" x={60} y={374} w={270} h={231} onClick={() => undefined} />
+          <Hotspot label="Complete onboarding" x={75} y={697} w={240} h={49} onClick={() => go("home")} />
+        </>
+      )}
+
+      {screen === "home" && (
+        <>
+          {productHotspots.map((spot, index) => (
+            <Hotspot key={`product-${index}`} label="Open product detail" {...spot} onClick={() => go("product")} />
+          ))}
+          {cartHotspots.map((spot, index) => (
+            <Hotspot key={`cart-${index}`} label="Add to cart" {...spot} onClick={addToCart} />
+          ))}
+        </>
+      )}
+
+      {screen === "product" && (
+        <>
+          <Hotspot label="Back to home" x={0} y={18} w={44} h={54} onClick={() => go("home")} />
+          <Hotspot label="Cart" x={348} y={20} w={42} h={54} onClick={() => setOverlay("cart")} />
+          <Hotspot label="Add to cart" x={0} y={742} w={195} h={102} onClick={addToCart} />
+          <Hotspot label="Buy now" x={195} y={742} w={195} h={102} onClick={() => setOverlay("buy")} />
+        </>
+      )}
+
+      {screen === "search" && (
+        <>
+          <Hotspot label="Search keyword chip" x={15} y={198} w={294} h={80} onClick={() => go("searchCustom1")} />
+          <Hotspot label="Similar symptom filter" x={15} y={344} w={354} h={255} onClick={() => go("searchCustom2")} />
+        </>
+      )}
+      {screen === "searchCustom1" && <Hotspot label="Next filter" x={15} y={344} w={354} h={255} onClick={() => go("searchCustom2")} />}
+      {screen === "searchCustom2" && <Hotspot label="Next filter" x={15} y={344} w={354} h={255} onClick={() => go("searchCustom3")} />}
+      {screen === "searchCustom3" && <Hotspot label="Next filter" x={15} y={344} w={354} h={255} onClick={() => go("searchCustom4")} />}
+      {screen === "searchCustom4" && <Hotspot label="Open matched product" x={18} y={630} w={350} h={104} onClick={() => go("product")} />}
+
+      {screen === "category" && <Hotspot label="Open category accordion" x={0} y={103} w={390} h={425} onClick={() => go("categoryDetail")} />}
+      {screen === "categoryDetail" && <Hotspot label="Expand category" x={0} y={103} w={390} h={425} onClick={() => go("categoryExpanded")} />}
+      {screen === "categoryExpanded" && <Hotspot label="Open category product" x={24} y={555} w={342} h={242} onClick={() => go("product")} />}
+
+      {screen === "delivery" && (
+        <>
+          <Hotspot label="Open date picker" x={16} y={135} w={355} h={80} onClick={() => setOverlay("date")} />
+          <Hotspot label="Write review" x={14} y={396} w={355} h={120} onClick={() => go("review1")} />
+        </>
+      )}
+
+      {screen === "my" && (
+        <>
+          <Hotspot label="Open my page detail" x={0} y={105} w={390} h={295} onClick={() => go("myDetail")} />
+          <Hotspot label="Restart onboarding" x={10} y={1365} w={360} h={80} onClick={() => go("onboarding1")} />
+        </>
+      )}
+      {screen === "myDetail" && <Hotspot label="Back to my page" x={0} y={20} w={44} h={54} onClick={() => go("my")} />}
+
+      {screen === "review1" && <Hotspot label="Start review" x={26} y={731} w={338} h={55} onClick={() => go("review2")} />}
+      {screen === "review2" && <Hotspot label="Select rating" x={58} y={236} w={276} h={210} onClick={() => go("review3")} />}
+      {screen === "review3" && <Hotspot label="Continue review" x={26} y={731} w={338} h={55} onClick={() => go("review4")} />}
+      {screen === "review4" && <Hotspot label="Submit review" x={26} y={731} w={338} h={55} onClick={() => go("review5")} />}
+      {screen === "review5" && <Hotspot label="Finish review" x={26} y={731} w={338} h={55} onClick={() => go("home")} />}
     </>
   );
 }
 
-function OnboardingChoiceButton({ label, selected, onClick }) {
+function BottomNav({ go }) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex h-12 w-full items-center justify-center gap-2 rounded-[14px] border-2 text-sm font-black transition focus:outline-none ${
-        selected ? "border-leaf-600 bg-leaf-100 text-neutral-800" : "border-leaf-600 bg-white text-neutral-800"
-      }`}
-    >
-      <CircleCheck size={18} className={selected ? "fill-leaf-600 text-white" : "text-neutral-400"} />
-      {label}
-    </button>
-  );
-}
-
-function AppShell({ children, activeTab, onTabChange }) {
-  return (
-    <div className="flex h-full flex-col bg-white">
-      <TopBar />
-      <div className="hide-scrollbar flex-1 overflow-y-auto pb-24">{children}</div>
-      <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
+    <div className="pointer-events-none absolute bottom-0 left-0 z-20 flex h-[94px] w-full justify-center bg-white">
+      <img src={figma("bottom-nav.png")} alt="" draggable="false" className="h-[94px] w-[388px] select-none" />
+      {tabs.map((tab) => (
+        <Hotspot
+          key={tab.id}
+          label={tab.label}
+          x={tab.x}
+          y={tab.y}
+          w={tab.w}
+          h={tab.h}
+          onClick={() => go(tab.id)}
+        />
+      ))}
     </div>
   );
 }
 
-function TopBar() {
+function ImageSheet({ src, height, width = 390, onClose }) {
   return (
-    <header className="flex h-[97px] items-end justify-between bg-leaf-600 px-5 pb-4 text-white">
-      <div>
-        <p className="text-xs font-semibold text-white/70">NoBloat</p>
-        <h1 className="text-xl font-black">Light Today</h1>
-      </div>
-      <div className="flex gap-3">
-        <IconButton label="Notifications">
-          <Bell size={19} />
-        </IconButton>
-        <IconButton label="Cart">
-          <ShoppingBag size={19} />
-        </IconButton>
-      </div>
-    </header>
+    <div className="absolute inset-0 z-40 bg-black/20" onClick={onClose}>
+      <img
+        src={src}
+        alt=""
+        draggable="false"
+        onClick={(event) => event.stopPropagation()}
+        className="absolute bottom-0 left-1/2 block max-w-none -translate-x-1/2 select-none"
+        style={{ width: `${width}px`, height: `${height}px` }}
+      />
+    </div>
   );
 }
 
-function IconButton({ children, label, onClick }) {
+function Toast({ children }) {
+  return (
+    <div className="absolute bottom-[112px] left-7 right-7 z-50 rounded-full bg-[#141414] px-4 py-3 text-center text-sm font-semibold text-white shadow-soft">
+      {children}
+    </div>
+  );
+}
+
+function Hotspot({ label, x, y, w, h, onClick }) {
   return (
     <button
+      type="button"
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/14 text-white transition hover:bg-white/22"
-    >
-      {children}
-    </button>
-  );
-}
-
-function BottomNav({ activeTab, onTabChange }) {
-  const tabs = [
-    { id: "home", label: "Home", icon: Home },
-    { id: "delivery", label: "Delivery", icon: PackageCheck },
-    { id: "category", label: "Category", icon: ListFilter },
-    { id: "search", label: "Search", icon: Search },
-    { id: "my", label: "My", icon: UserRound }
-  ];
-
-  return (
-    <nav className="absolute bottom-0 left-0 right-0 border-t border-neutral-100 bg-white px-4 pb-5 pt-3 shadow-[0_-12px_30px_rgba(0,0,0,0.06)]">
-      <div className="grid grid-cols-5 gap-1">
-        {tabs.map(({ id, label, icon: Icon }) => {
-          const selected = activeTab === id;
-          return (
-            <button
-              key={id}
-              onClick={() => onTabChange(id)}
-              className={`flex h-12 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-bold ${
-                selected ? "bg-leaf-50 text-leaf-700" : "text-neutral-400"
-              }`}
-            >
-              <Icon size={19} strokeWidth={selected ? 2.8 : 2.2} />
-              {label}
-            </button>
-          );
-        })}
-      </div>
-    </nav>
-  );
-}
-
-function HomeScreen({ products, goals, onOpenProduct, onToast }) {
-  const recommended = products.filter((item) => goals.includes(item.symptom)).slice(0, 4);
-  return (
-    <div className="space-y-8 px-4 py-5">
-      <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-neutral-50 px-4 text-sm text-neutral-500">
-        <Search size={18} />
-        Search for a lighter meal
-      </button>
-
-      <section className="overflow-hidden rounded-lg bg-leaf-600 text-white">
-        <div
-          className="product-image h-48"
-          style={{
-            backgroundImage:
-              "linear-gradient(90deg, rgba(5,105,29,.92), rgba(5,105,29,.08)), url(https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=900&q=80)"
-          }}
-        >
-          <div className="flex h-full flex-col justify-between p-5">
-            <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-black text-leaf-700">Today's pick</span>
-            <div>
-              <h2 className="text-2xl font-black leading-8">Feel lighter<br />eat smarter</h2>
-              <p className="mt-2 text-xs font-medium text-white/80">Personalized by your symptom profile</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <ProductRail title="Similar symptom picks" subtitle="Products matched to your selected condition" products={recommended.length ? recommended : products.slice(0, 4)} onOpenProduct={onOpenProduct} onToast={onToast} />
-      <ProductRail title="NoBloat Best" subtitle="Popular items customers reorder for lighter days" products={products.slice(3, 8)} onOpenProduct={onOpenProduct} onToast={onToast} />
-
-      <div className="bg-leaf-50 px-4 py-5">
-        <p className="text-xs font-bold text-leaf-700">BANNER</p>
-        <h3 className="mt-1 text-lg font-black text-leaf-900">20% off your first low-sodium plan</h3>
-      </div>
-    </div>
-  );
-}
-
-function ProductRail({ title, subtitle, products, onOpenProduct, onToast }) {
-  return (
-    <section>
-      <div className="mb-4 flex items-end justify-between">
-        <div>
-          <h2 className="text-lg font-black text-neutral-950">{title}</h2>
-          <p className="mt-1 text-xs font-semibold text-neutral-400">{subtitle}</p>
-        </div>
-        <button className="flex items-center text-xs font-bold text-leaf-700">
-          More <ChevronRight size={14} />
-        </button>
-      </div>
-      <div className="hide-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} onOpenProduct={onOpenProduct} onToast={onToast} compact />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ProductCard({ product, onOpenProduct, onToast, compact = false }) {
-  return (
-    <article className={`${compact ? "w-[148px] shrink-0" : "w-full"} overflow-hidden`}>
-      <button
-        onClick={() => onOpenProduct(product)}
-        className="block w-full text-left"
-      >
-        <div
-          className={`product-image relative rounded-lg bg-leaf-50 ${compact ? "h-[148px]" : "h-36"}`}
-          style={{ backgroundImage: `url(${product.image})` }}
-        >
-          <span className="absolute left-2 top-2 rounded-md bg-leaf-600 px-2 py-1 text-[10px] font-black text-white">
-            {product.badge}
-          </span>
-        </div>
-        <h3 className="mt-3 line-clamp-2 min-h-10 text-sm font-black leading-5 text-neutral-950">{product.name}</h3>
-        <p className="mt-1 text-xs font-semibold text-neutral-400">{product.symptom} · {product.categoryLabel}</p>
-        <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-base font-black text-neutral-950">{formatPrice(product.price)}</span>
-          <span className="text-xs font-semibold text-neutral-300 line-through">{formatPrice(product.oldPrice)}</span>
-        </div>
-      </button>
-      <button
-        onClick={() => onToast(`${product.name} was added to your cart`)}
-        className="mt-3 h-9 w-full rounded-lg border border-leaf-500 text-xs font-black text-leaf-700"
-      >
-        Add
-      </button>
-    </article>
-  );
-}
-
-function SearchScreen({ products, onOpenProduct, onToast }) {
-  const [query, setQuery] = useState("");
-  const [activeChip, setActiveChip] = useState("Low sugar");
-
-  const results = useMemo(() => {
-    const needle = (query || activeChip).toLowerCase();
-    return products.filter((product) =>
-      [product.name, product.symptom, product.categoryLabel, ...product.tags].join(" ").toLowerCase().includes(needle)
-    );
-  }, [activeChip, products, query]);
-
-  return (
-    <div className="px-4 py-5">
-      <label className="flex h-11 items-center gap-3 rounded-lg bg-neutral-50 px-4">
-        <Search size={18} className="text-neutral-400" />
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search NoBloat"
-          className="w-full bg-transparent text-sm font-semibold outline-none placeholder:text-neutral-400"
-        />
-      </label>
-
-      <section className="mt-6">
-        <h2 className="text-base font-black">Popular keywords</h2>
-        <ChipCloud chips={keywordChips.slice(0, 8)} active={activeChip} onSelect={(chip) => { setActiveChip(chip); setQuery(chip); }} />
-      </section>
-
-      <section className="mt-7">
-        <h2 className="text-base font-black">Similar symptom filter</h2>
-        <ChipCloud chips={symptoms} active={activeChip} onSelect={(chip) => { setActiveChip(chip); setQuery(chip === "All" ? "" : chip); }} />
-      </section>
-
-      <div className="mt-7 grid grid-cols-2 gap-x-3 gap-y-7">
-        {(results.length ? results : products).map((product) => (
-          <ProductCard key={product.id} product={product} onOpenProduct={onOpenProduct} onToast={onToast} compact />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ChipCloud({ chips, active, onSelect }) {
-  return (
-    <div className="mt-3 flex flex-wrap gap-2">
-      {chips.map((chip) => {
-        const selected = active === chip;
-        return (
-          <button
-            key={chip}
-            onClick={() => onSelect(chip)}
-            className={`h-9 rounded-lg border px-4 text-xs font-black ${
-              selected ? "border-leaf-600 bg-leaf-600 text-white" : "border-leaf-100 bg-white text-leaf-800"
-            }`}
-          >
-            {chip}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function CategoryScreen({ products, onOpenProduct, onToast }) {
-  const [openCategory, setOpenCategory] = useState("meal");
-
-  return (
-    <div className="px-4 py-5">
-      <h2 className="text-lg font-black">Categories</h2>
-      <p className="mt-1 text-sm font-semibold text-neutral-400">Open a category to browse matching products.</p>
-
-      <div className="mt-5 space-y-3">
-        {categories.map((category) => {
-          const open = openCategory === category.id;
-          const categoryProducts = products.filter((product) => product.category === category.id);
-          return (
-            <section key={category.id} className="overflow-hidden rounded-lg border border-neutral-100">
-              <button
-                onClick={() => setOpenCategory(open ? "" : category.id)}
-                className="flex w-full items-center justify-between bg-white px-4 py-4 text-left"
-              >
-                <span className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-leaf-50 text-sm font-black text-leaf-700">{category.icon}</span>
-                  <span>
-                    <span className="block text-sm font-black text-neutral-950">{category.name}</span>
-                    <span className="text-xs font-semibold text-neutral-400">{category.detail}</span>
-                  </span>
-                </span>
-                <ChevronDown size={18} className={`text-leaf-700 transition ${open ? "rotate-180" : ""}`} />
-              </button>
-              {open && (
-                <div className="grid grid-cols-2 gap-x-3 gap-y-6 border-t border-neutral-100 bg-neutral-50 px-3 py-4">
-                  {(categoryProducts.length ? categoryProducts : products.slice(0, 2)).map((product) => (
-                    <ProductCard key={product.id} product={product} onOpenProduct={onOpenProduct} onToast={onToast} compact />
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function DeliveryScreen({ onToast }) {
-  const [reviewText, setReviewText] = useState("");
-  const [reviewDone, setReviewDone] = useState(false);
-
-  return (
-    <div className="space-y-6 px-4 py-5">
-      <section className="rounded-lg bg-leaf-50 p-4">
-        <p className="text-xs font-black text-leaf-700">Next delivery</p>
-        <h2 className="mt-1 text-xl font-black text-leaf-950">Arrives today at 6:00 PM</h2>
-        <div className="mt-5 h-2 rounded-full bg-white">
-          <div className="h-2 w-[72%] rounded-full bg-leaf-600" />
-        </div>
-        <div className="mt-4 grid grid-cols-4 gap-2 text-center text-[11px] font-bold text-neutral-500">
-          {["Ordered", "Packed", "On the way", "Arrived"].map((step, index) => (
-            <span key={step} className={index < 3 ? "text-leaf-700" : ""}>{step}</span>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-base font-black">Delivery calendar</h2>
-        <div className="mt-3 grid grid-cols-7 gap-2">
-          {Array.from({ length: 14 }, (_, index) => (
-            <button
-              key={index}
-              className={`flex h-11 flex-col items-center justify-center rounded-lg text-xs font-black ${
-                [2, 5, 9].includes(index) ? "bg-leaf-600 text-white" : "bg-neutral-50 text-neutral-500"
-              }`}
-            >
-              <span>{index + 1}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-neutral-100 p-4">
-        <h2 className="text-base font-black">Review</h2>
-        <p className="mt-1 text-xs font-semibold text-neutral-400">Share a quick note about your delivered item.</p>
-        <div className="mt-4 flex gap-1 text-amber-400">
-          {Array.from({ length: 5 }, (_, index) => <Star key={index} size={18} fill="currentColor" />)}
-        </div>
-        <textarea
-          value={reviewText}
-          onChange={(event) => setReviewText(event.target.value)}
-          placeholder="Write about taste, packaging, and how you felt."
-          className="mt-4 h-24 w-full resize-none rounded-lg bg-neutral-50 p-3 text-sm font-semibold outline-none placeholder:text-neutral-400"
-        />
-        <button
-          onClick={() => {
-            setReviewDone(true);
-            onToast("Your review was submitted");
-          }}
-          className="mt-3 h-11 w-full rounded-lg bg-leaf-600 text-sm font-black text-white"
-        >
-          Submit review
-        </button>
-        {reviewDone && <p className="mt-3 text-center text-xs font-black text-leaf-700">Review submitted. Thank you!</p>}
-      </section>
-    </div>
-  );
-}
-
-function MyPage({ goals, onReset, onToast }) {
-  return (
-    <div className="space-y-6 px-4 py-5">
-      <section className="flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-leaf-100 text-2xl font-black text-leaf-700">N</div>
-        <div>
-          <h2 className="text-lg font-black">NoBloat Member</h2>
-          <p className="mt-1 text-xs font-semibold text-neutral-400">Managing {goals.join(", ")}</p>
-        </div>
-      </section>
-
-      <section className="grid grid-cols-2 gap-3">
-        <Stat title="Orders this month" value="6" />
-        <Stat title="Review points" value="1,240" />
-      </section>
-
-      <section className="grid grid-cols-4 gap-2 text-center">
-        {["Coupons", "Saved", "Reviews", "Settings"].map((item) => (
-          <button key={item} onClick={() => onToast(`${item} is a demo-only menu`)} className="h-16 rounded-lg bg-neutral-50 text-xs font-black text-neutral-600">
-            {item}
-          </button>
-        ))}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-base font-black">My care menu</h2>
-        {["Delivery addresses", "Payment methods", "Retake symptom survey"].map((item) => (
-          <button
-            key={item}
-            onClick={item.includes("survey") ? onReset : () => onToast(`${item} is disabled in this demo`)}
-            className="flex h-12 w-full items-center justify-between rounded-lg border border-neutral-100 px-4 text-sm font-bold text-neutral-700"
-          >
-            {item}
-            <ChevronRight size={16} className="text-neutral-300" />
-          </button>
-        ))}
-      </section>
-    </div>
-  );
-}
-
-function Stat({ title, value }) {
-  return (
-    <div className="rounded-lg bg-leaf-50 p-4">
-      <p className="text-xs font-bold text-leaf-700">{title}</p>
-      <p className="mt-2 text-2xl font-black text-leaf-950">{value}</p>
-    </div>
-  );
-}
-
-function ProductDetail({ product, products, onBack, onOpenProduct, onToast, onBuy }) {
-  const [activeSymptom, setActiveSymptom] = useState(product.symptom);
-  const similar = products.filter((item) => item.id !== product.id && (activeSymptom === "All" || item.symptom === activeSymptom));
-
-  return (
-    <div className="flex h-full flex-col bg-white">
-      <header className="absolute left-0 right-0 top-0 z-20 flex h-20 items-end justify-between px-4 pb-3">
-        <IconButton label="Back" onClick={onBack}>
-          <ChevronLeft size={21} />
-        </IconButton>
-        <IconButton label="Cart">
-          <ShoppingBag size={19} />
-        </IconButton>
-      </header>
-      <div className="hide-scrollbar flex-1 overflow-y-auto pb-28">
-        <div className="product-image h-[330px]" style={{ backgroundImage: `url(${product.image})` }} />
-        <section className="px-5 py-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-black text-leaf-700">{product.badge} · {product.symptom}</p>
-              <h1 className="mt-2 text-2xl font-black leading-8 text-neutral-950">{product.name}</h1>
-            </div>
-            <div className="flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-xs font-black text-amber-600">
-              <Star size={14} fill="currentColor" /> {product.rating}
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-2xl font-black">{formatPrice(product.price)}</span>
-            <span className="text-sm font-semibold text-neutral-300 line-through">{formatPrice(product.oldPrice)}</span>
-          </div>
-          <p className="mt-4 text-sm leading-6 text-neutral-600">{product.description}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {product.tags.map((tag) => (
-              <span key={tag} className="rounded-lg bg-leaf-50 px-3 py-2 text-xs font-black text-leaf-700">#{tag}</span>
-            ))}
-          </div>
-        </section>
-
-        <section className="border-t border-neutral-100 px-5 py-5">
-          <h2 className="text-base font-black">Similar symptom filter</h2>
-          <ChipCloud chips={symptoms} active={activeSymptom} onSelect={setActiveSymptom} />
-          <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-7">
-            {(similar.length ? similar : products.slice(0, 4)).slice(0, 4).map((item) => (
-              <ProductCard key={item.id} product={item} onOpenProduct={onOpenProduct} onToast={onToast} compact />
-            ))}
-          </div>
-        </section>
-
-        <section className="border-t border-neutral-100 px-5 py-5">
-          <h2 className="text-base font-black">Reviews</h2>
-          {["Easy to eat in the morning, and I felt less heavy afterward.", "The packaging was clean and easy to store at work."].map((review) => (
-            <div key={review} className="mt-3 rounded-lg bg-neutral-50 p-4">
-              <div className="mb-2 flex gap-1 text-amber-400">
-                {Array.from({ length: 5 }, (_, index) => <Star key={index} size={13} fill="currentColor" />)}
-              </div>
-              <p className="text-xs font-semibold leading-5 text-neutral-600">{review}</p>
-            </div>
-          ))}
-        </section>
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0 grid grid-cols-[1fr_1.35fr] gap-3 border-t border-neutral-100 bg-white px-5 pb-5 pt-3">
-        <button
-          onClick={() => onToast(`${product.name} was added to your cart`)}
-          className="h-12 rounded-lg border border-leaf-600 text-sm font-black text-leaf-700"
-        >
-          Add cart
-        </button>
-        <button
-          onClick={() => onBuy(product)}
-          className="h-12 rounded-lg bg-leaf-600 text-sm font-black text-white"
-        >
-          Buy now
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function BuyModal({ product, onClose }) {
-  return (
-    <div className="absolute inset-0 z-40 flex items-end bg-black/35">
-      <section className="w-full rounded-t-[24px] bg-white px-5 pb-6 pt-3 shadow-phone">
-        <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-neutral-200" />
-        <div className="flex gap-4">
-          <div className="product-image h-16 w-16 rounded-lg" style={{ backgroundImage: `url(${product.image})` }} />
-          <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-black leading-5">{product.name}</h2>
-            <p className="mt-1 text-xs font-semibold text-neutral-400">Qty 1 · Delivery available any day</p>
-            <p className="mt-2 text-lg font-black">{formatPrice(product.price)}</p>
-          </div>
-        </div>
-        <div className="mt-5 rounded-lg bg-leaf-50 p-4">
-          <p className="text-xs font-bold text-leaf-700">Demo checkout</p>
-          <p className="mt-1 text-sm font-semibold text-leaf-950">Real payment, login, and backend services are not implemented.</p>
-        </div>
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <button onClick={onClose} className="h-12 rounded-lg border border-neutral-200 text-sm font-black text-neutral-600">
-            Cancel
-          </button>
-          <button onClick={onClose} className="h-12 rounded-lg bg-leaf-600 text-sm font-black text-white">
-            Confirm
-          </button>
-        </div>
-      </section>
-    </div>
+      className="pointer-events-auto absolute z-30 cursor-pointer bg-transparent p-0 focus:outline-none"
+      style={{ left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px` }}
+    />
   );
 }
 
