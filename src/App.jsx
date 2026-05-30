@@ -4,12 +4,17 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CircleCheck,
+  Coffee,
+  Croissant,
   Home,
+  Popcorn,
   ListFilter,
   PackageCheck,
   Search,
   ShoppingBag,
   Star,
+  Utensils,
   UserRound
 } from "lucide-react";
 
@@ -155,6 +160,11 @@ function App() {
   const [stage, setStage] = useState("splash");
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [selectedGoals, setSelectedGoals] = useState(["Bloating"]);
+  const [onboardingChoices, setOnboardingChoices] = useState({
+    intolerance: "Gluten intolerance",
+    severity: "Moderate",
+    cause: "Cafe"
+  });
   const [activeTab, setActiveTab] = useState("home");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [toast, setToast] = useState("");
@@ -189,14 +199,10 @@ function App() {
     content = (
       <Onboarding
         step={onboardingStep}
-        selectedGoals={selectedGoals}
-        onToggleGoal={(goal) =>
-          setSelectedGoals((current) =>
-            current.includes(goal) ? current.filter((item) => item !== goal) : [...current, goal]
-          )
-        }
+        choices={onboardingChoices}
+        onSelectChoice={(key, value) => setOnboardingChoices((current) => ({ ...current, [key]: value }))}
         onNext={() => {
-          if (onboardingStep < 2) setOnboardingStep((step) => step + 1);
+          if (onboardingStep < 3) setOnboardingStep((step) => step + 1);
           else setStage("app");
         }}
       />
@@ -220,7 +226,14 @@ function App() {
         {activeTab === "category" && <CategoryScreen {...sharedProps} />}
         {activeTab === "search" && <SearchScreen {...sharedProps} />}
         {activeTab === "my" && (
-          <MyPage goals={selectedGoals} onReset={() => setStage("onboarding")} onToast={showToast} />
+          <MyPage
+            goals={selectedGoals}
+            onReset={() => {
+              setOnboardingStep(0);
+              setStage("onboarding");
+            }}
+            onToast={showToast}
+          />
         )}
       </AppShell>
     );
@@ -253,86 +266,147 @@ function SplashScreen() {
   );
 }
 
-function Onboarding({ step, selectedGoals, onToggleGoal, onNext }) {
-  const pages = [
-    {
-      title: "Welcome",
-      subtitle: "We will recommend light meals that match how you feel today.",
-      body: (
-        <div className="mt-8 space-y-3">
-          {["Stomach-friendly meals", "Bloat care", "Low-sugar snacks"].map((item) => (
-            <div key={item} className="rounded-lg border border-leaf-100 bg-leaf-50 px-4 py-4 text-sm font-semibold text-leaf-800">
-              {item}
-            </div>
-          ))}
-        </div>
-      )
-    },
-    {
-      title: "Types of Symptoms",
-      subtitle: "Choose similar symptoms to tune recommendations on home and detail screens.",
-      body: (
-        <div className="mt-7 grid grid-cols-2 gap-3">
-          {symptoms.slice(1).map((goal) => {
-            const selected = selectedGoals.includes(goal);
-            return (
-              <button
-                key={goal}
-                onClick={() => onToggleGoal(goal)}
-                className={`min-h-20 rounded-lg border px-3 text-left text-sm font-bold transition ${
-                  selected ? "border-leaf-600 bg-leaf-600 text-white" : "border-leaf-100 bg-white text-leaf-900"
-                }`}
-              >
-                {goal}
-                <span className={`mt-2 block text-xs font-medium ${selected ? "text-white/75" : "text-neutral-500"}`}>
-                  {goal === "Water retention" ? "After salty meals" : goal === "Post-meal slump" ? "Heavy after lunch" : "Daily care"}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )
-    },
-    {
-      title: "Monthly Goal",
-      subtitle: "Set this month's goal and start your NoBloat recommendations.",
-      body: (
-        <div className="mt-8 rounded-lg bg-leaf-50 p-5">
-          <div className="mb-5 flex items-center justify-between">
-            <span className="text-sm font-bold text-leaf-900">Bloat-free streak</span>
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-leaf-700">81%</span>
-          </div>
-          <div className="h-3 rounded-full bg-white">
-            <div className="h-3 w-[81%] rounded-full bg-leaf-600" />
-          </div>
-          <p className="mt-5 text-xs leading-5 text-neutral-600">Product picks and delivery reminders are organized around your symptoms and meal times.</p>
-        </div>
-      )
-    }
+function Onboarding({ step, choices, onSelectChoice, onNext }) {
+  const typeOptions = ["Gluten intolerance", "Both", "Lactose intolerance"];
+  const severityOptions = ["Mild", "Moderate", "Severe"];
+  const causeOptions = [
+    { label: "Cafe", icon: Coffee },
+    { label: "Bakery", icon: Croissant },
+    { label: "Restaurant", icon: Utensils },
+    { label: "Snack", icon: Popcorn }
   ];
 
-  const page = pages[step];
+  if (step === 0) {
+    return (
+      <div className="flex h-full flex-col bg-white">
+        <section className="relative h-[314px] overflow-hidden bg-leaf-600 px-8 pt-12 text-center text-white">
+          <div className="mx-auto mt-1 flex h-14 w-60 items-center justify-center rounded-lg bg-[#26a734]">
+            <h1 className="text-2xl font-black tracking-normal">NoBloat</h1>
+          </div>
+          <p className="mt-11 text-sm font-medium text-white/75">Food-Allergy-Tailored Shopping</p>
+          <p className="mt-6 text-sm font-medium text-white/75">We will find you the trusty meal!</p>
+          <div className="absolute -bottom-11 left-[-10%] h-24 w-[120%] rounded-[50%] bg-white" />
+        </section>
+
+        <section className="flex flex-1 flex-col items-center px-9 pb-20 pt-24 text-center">
+          <h2 className="text-lg font-black leading-6 text-neutral-800">Registration<br />Complete!</h2>
+          <p className="mt-4 text-sm leading-6 text-neutral-500">
+            We'll guide you to set up the symptom profiles to find the food that you would like.
+          </p>
+          <div className="mt-auto w-full">
+            <p className="mb-1 text-base font-medium text-leaf-600">Start !</p>
+            <button
+              onClick={onNext}
+              className="flex h-12 w-full items-center justify-center rounded-[18px] bg-leaf-600 text-base font-black text-white shadow-soft focus:outline-none"
+            >
+              Custom Settings
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  const title = step === 1 ? "Types of Symptoms" : step === 2 ? "Severity of Symptoms" : "Main Cause";
+  const progress = step === 1 ? "34%" : step === 2 ? "68%" : "100%";
+
   return (
     <div className="flex h-full flex-col bg-white">
-      <div className="bg-leaf-600 px-6 pb-8 pt-12 text-white">
-        <div className="mb-10 flex gap-2">
-          {pages.map((_, index) => (
-            <span key={index} className={`h-1.5 flex-1 rounded-full ${index <= step ? "bg-white" : "bg-white/30"}`} />
-          ))}
-        </div>
-        <h1 className="text-2xl font-black">{page.title}</h1>
-        <p className="mt-3 text-sm leading-6 text-white/82">{page.subtitle}</p>
-      </div>
-      <div className="flex flex-1 flex-col px-6 py-7">
-        {page.body}
+      <OnboardingHeader title={title} step={step} progress={progress} />
+      <section className="flex flex-1 flex-col px-10 pb-20 pt-20">
+        {step === 1 && (
+          <>
+            <h2 className="text-center text-sm font-black text-leaf-600">Select the type of intolerance</h2>
+            <div className="mt-9 space-y-8">
+              {typeOptions.map((option) => (
+                <OnboardingChoiceButton
+                  key={option}
+                  label={option}
+                  selected={choices.intolerance === option}
+                  onClick={() => onSelectChoice("intolerance", option)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <h2 className="text-center text-sm font-black text-leaf-600">Select the severity of intolerance</h2>
+            <div className="mt-9 space-y-8">
+              {severityOptions.map((option) => (
+                <OnboardingChoiceButton
+                  key={option}
+                  label={option}
+                  selected={choices.severity === option}
+                  onClick={() => onSelectChoice("severity", option)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <h2 className="text-center text-sm font-black text-leaf-600">Where do you usually eat food?</h2>
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              {causeOptions.map(({ label, icon: Icon }) => {
+                const selected = choices.cause === label;
+                return (
+                  <button
+                    key={label}
+                    onClick={() => onSelectChoice("cause", label)}
+                    className={`flex h-[108px] flex-col items-center justify-center rounded-[18px] border-2 text-sm font-black transition focus:outline-none ${
+                      selected ? "border-leaf-600 bg-leaf-100 text-leaf-700" : "border-leaf-600 bg-white text-leaf-700"
+                    }`}
+                  >
+                    <Icon size={30} strokeWidth={1.8} className="mb-4 text-leaf-600" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
         <button
           onClick={onNext}
-          className="mt-auto flex h-12 items-center justify-center rounded-lg bg-leaf-600 text-sm font-black text-white shadow-soft"
+          className="mt-auto flex h-12 items-center justify-center rounded-[18px] bg-leaf-600 text-base font-black text-white shadow-soft focus:outline-none"
         >
-          {step === 2 ? "Start NoBloat" : "Continue"}
+          {step === 3 ? "Complete" : "Next"}
         </button>
-      </div>
+      </section>
     </div>
+  );
+}
+
+function OnboardingHeader({ title, step, progress }) {
+  return (
+    <>
+      <header className="flex h-[120px] items-center justify-center bg-leaf-600 px-8 pt-3 text-center text-white">
+        <h1 className="text-2xl font-black tracking-normal">{title}</h1>
+      </header>
+      <div className="px-11 pt-11 text-center">
+        <div className="h-2 rounded-full bg-[#dff8e3]">
+          <div className="h-2 rounded-full bg-leaf-600" style={{ width: progress }} />
+        </div>
+        <p className="mt-2 text-[10px] font-black text-leaf-600">Step {step}</p>
+      </div>
+    </>
+  );
+}
+
+function OnboardingChoiceButton({ label, selected, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex h-12 w-full items-center justify-center gap-2 rounded-[14px] border-2 text-sm font-black transition focus:outline-none ${
+        selected ? "border-leaf-600 bg-leaf-100 text-neutral-800" : "border-leaf-600 bg-white text-neutral-800"
+      }`}
+    >
+      <CircleCheck size={18} className={selected ? "fill-leaf-600 text-white" : "text-neutral-400"} />
+      {label}
+    </button>
   );
 }
 
