@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&family=Caprasimo&family=Inter:wght@400;600;700;800;900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,9 +16,7 @@ body,
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at 20% 10%, rgba(97, 197, 111, 0.14), transparent 28%),
-    linear-gradient(135deg, #eaf5ec 0%, #f7faf5 44%, #e4f1e5 100%);
+  background: #f2f2f2;
   color: #162116;
 }
 
@@ -41,4 +41,8 @@ button {
 .product-image {
   background-size: cover;
   background-position: center;
+}
+
+.font-logo {
+  font-family: "Caprasimo", Georgia, serif;
 }
