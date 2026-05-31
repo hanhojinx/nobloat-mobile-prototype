@@ -752,8 +752,23 @@ function BottomNav({ activeTab, onTabChange }) {
 }
 
 function HomeScreen({ products, onOpenProduct, onToast }) {
+  const [productView, setProductView] = useState(null);
   const bestProducts = products.slice(0, 9);
   const recommendedProducts = products.slice(9, 18);
+
+  if (productView) {
+    const viewProducts = productView === "best" ? bestProducts : recommendedProducts;
+    return (
+      <HomeProductListScreen
+        title={productView === "best" ? "Best Products" : "Recommended Products"}
+        subtitle={productView === "best" ? "From Daily Best to Monthly Best" : "Add to Cart to Get Cheap Items!"}
+        products={viewProducts}
+        onBack={() => setProductView(null)}
+        onOpenProduct={onOpenProduct}
+        onToast={onToast}
+      />
+    );
+  }
 
   return (
     <div className="font-body bg-white pt-[20px]">
@@ -768,6 +783,7 @@ function HomeScreen({ products, onOpenProduct, onToast }) {
         products={bestProducts}
         onOpenProduct={onOpenProduct}
         onToast={onToast}
+        onViewAll={() => setProductView("best")}
       />
       <HomePromoBand />
       <HomeProductSection
@@ -778,6 +794,7 @@ function HomeScreen({ products, onOpenProduct, onToast }) {
         onToast={onToast}
         accent="purple"
         className="mt-[71px]"
+        onViewAll={() => setProductView("recommended")}
       />
     </div>
   );
@@ -801,7 +818,7 @@ function HomeHeroCarousel({ promos }) {
   );
 }
 
-function HomeProductSection({ title, subtitle, products, onOpenProduct, onToast, accent = "green", className = "mt-[54px]" }) {
+function HomeProductSection({ title, subtitle, products, onOpenProduct, onToast, onViewAll, accent = "green", className = "mt-[54px]" }) {
   return (
     <section className={className}>
       <div className="flex items-start justify-between px-[14px]">
@@ -809,7 +826,7 @@ function HomeProductSection({ title, subtitle, products, onOpenProduct, onToast,
           <h2 className="text-[17px] leading-[20px] text-[#404040]">{title}</h2>
           <p className="mt-[6px] text-[13px] leading-[16px] text-[#a3a3a3]">{subtitle}</p>
         </div>
-        <button className={`mt-[1px] flex items-center gap-[3px] text-[11px] ${accent === "purple" ? "text-[#6b008d]" : "text-[#008407]"}`}>
+        <button onClick={onViewAll} className={`mt-[1px] flex items-center gap-[3px] text-[11px] ${accent === "purple" ? "text-[#6b008d]" : "text-[#008407]"}`}>
           View All
           <ChevronRight size={11} strokeWidth={2} />
         </button>
@@ -820,6 +837,44 @@ function HomeProductSection({ title, subtitle, products, onOpenProduct, onToast,
         ))}
       </div>
     </section>
+  );
+}
+
+function HomeProductListScreen({ title, subtitle, products, onBack, onOpenProduct, onToast }) {
+  return (
+    <div className="min-h-[1228px] bg-white px-[14px] pt-[22px] font-body">
+      <header className="flex items-start justify-between">
+        <button
+          onClick={onBack}
+          className="flex h-[34px] w-[34px] items-center justify-center text-[#333333]"
+          aria-label="Back to home"
+          title="Back to home"
+        >
+          <ChevronLeft size={24} strokeWidth={1.8} />
+        </button>
+        <div className="mr-[34px] text-center">
+          <h1 className="text-[18px] leading-[22px] text-[#404040]">{title}</h1>
+          <p className="mt-[6px] text-[12px] leading-[15px] text-[#a3a3a3]">{subtitle}</p>
+        </div>
+      </header>
+
+      <div className="mt-[24px] flex items-center justify-between border-y border-[#eeeeee] py-[12px]">
+        <button className="rounded-full bg-[#e8ffe9] px-[13px] py-[7px] text-[12px] leading-[14px] text-[#008407]">
+          Trusty Meal
+        </button>
+        <div className="flex items-center gap-[13px] text-[12px] leading-[14px] text-[#777777]">
+          <button>Popular</button>
+          <button>Newest</button>
+          <button>Low Price</button>
+        </div>
+      </div>
+
+      <section className="mt-[22px] grid grid-cols-2 gap-x-[29px] gap-y-[25px] pb-[120px]">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} onOpenProduct={onOpenProduct} onToast={onToast} />
+        ))}
+      </section>
+    </div>
   );
 }
 
