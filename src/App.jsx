@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Bell,
+  Bookmark,
   CalendarDays,
   Check,
   ChevronDown,
@@ -9,14 +10,18 @@ import {
   CircleCheck,
   Coffee,
   Croissant,
+  Heart,
   Home,
   ListFilter,
   MessageCircle,
   Package,
   PackageCheck,
   Popcorn,
+  Plus,
   Search,
+  Settings,
   Star,
+  Ticket,
   Utensils,
   UserRound
 } from "lucide-react";
@@ -297,6 +302,54 @@ const categories = [
 const keywordChips = ["Lacto-free", "Gluten-free", "Protein", "Milk", "Bakery", "Dessert", "Noodles", "Low sugar"];
 const symptoms = ["All", "Lactose intolerance", "Gluten intolerance", "Sensitive stomach"];
 
+const myPageSections = [
+  {
+    id: "gluten",
+    title: "gluten free",
+    count: 10,
+    items: [
+      { src: asset("my/gluten-cake.png"), alt: "Gluten-free carrot cake", crop: "cake" },
+      { src: asset("my/gluten-roll.png"), alt: "Gluten-free cinnamon roll", crop: "roll" },
+      { src: asset("my/gluten-bread.png"), alt: "Gluten-free sliced bread" },
+      { src: asset("my/gluten-cookie.png"), alt: "Gluten-free cookie box", overlay: true }
+    ]
+  },
+  {
+    id: "lacto",
+    title: "lactose free",
+    count: 13,
+    items: [
+      { src: asset("my/lacto-protein.png"), alt: "Lacto-free protein powder" },
+      { src: asset("my/lacto-boxes.png"), alt: "Lacto-free product gift set" },
+      { src: asset("my/lacto-pink.png"), alt: "Lacto-free milk cartons" },
+      { src: asset("my/lacto-yogurt.png"), alt: "Lacto-free Greek yogurt", overlay: true }
+    ]
+  }
+];
+
+const myDetailTiles = [
+  { src: asset("my/detail-01.png"), alt: "Gluten-free udon packs", x: 7, y: 6, w: 248, h: 248 },
+  { src: asset("my/detail-02.png"), alt: "Brown rice bread", x: 257, y: 6, w: 123, h: 123 },
+  { src: asset("my/detail-03.png"), alt: "Sliced gluten-free bread", x: 257, y: 131, w: 123, h: 123 },
+  { src: asset("my/detail-04.png"), alt: "Buckwheat snack cracker", x: 132, y: 256, w: 248, h: 248, flip: true },
+  { src: asset("my/detail-05.png"), alt: "Rice cake packaging", x: 7, y: 256, w: 123, h: 123, flip: true },
+  { src: asset("my/detail-06.png"), alt: "Pancake cookie package", x: 7, y: 381, w: 123, h: 123, flip: true },
+  { src: asset("my/detail-07.png"), alt: "Kimchi snack bag", x: 7, y: 506, w: 248, h: 248 },
+  { src: asset("my/detail-08.png"), alt: "Madeleine box", x: 257, y: 506, w: 123, h: 123 },
+  { src: asset("my/detail-09.png"), alt: "Dessert with green grapes", x: 257, y: 631, w: 123, h: 123 },
+  { src: asset("my/detail-10.png"), alt: "Lacto-free protein cans", x: 132, y: 756, w: 248, h: 248, flip: true },
+  { src: asset("my/detail-11.png"), alt: "Blueberry yogurt pack", x: 7, y: 756, w: 123, h: 123, flip: true },
+  { src: asset("my/detail-12.png"), alt: "Milk carton", x: 7, y: 881, w: 123, h: 123, flip: true },
+  { src: asset("my/detail-13.png"), alt: "Maeil high protein cartons", x: 7, y: 1006, w: 248, h: 248 },
+  { src: asset("my/detail-14.png"), alt: "Lacto-free beverage bottle", x: 257, y: 1006, w: 123, h: 123 },
+  { src: asset("my/detail-15.png"), alt: "Small milk carton", x: 257, y: 1131, w: 123, h: 123 },
+  { src: asset("my/detail-16.png"), alt: "Yonsei milk carton", x: 132, y: 1256, w: 248, h: 248, flip: true },
+  { src: asset("my/detail-17.png"), alt: "Lacto-free Greek yogurt package", x: 7, y: 1256, w: 123, h: 123, flip: true },
+  { src: asset("my/detail-18.png"), alt: "Chocolate milk package", x: 7, y: 1381, w: 123, h: 123, flip: true },
+  { src: asset("my/detail-19.png"), alt: "Green protein milk package", x: 7, y: 1506, w: 248, h: 248 },
+  { src: asset("my/detail-20.png"), alt: "Protein box", x: 257, y: 1506, w: 123, h: 123 }
+];
+
 function formatPrice(price) {
   return `₩${price.toLocaleString("en-US")}`;
 }
@@ -311,6 +364,7 @@ function App() {
   });
   const [activeTab, setActiveTab] = useState("home");
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [myDetailOpen, setMyDetailOpen] = useState(false);
   const [reviewStep, setReviewStep] = useState(0);
   const [toast, setToast] = useState("");
   const [modal, setModal] = useState(null);
@@ -327,7 +381,15 @@ function App() {
 
   function openProduct(product = detailProduct) {
     setReviewStep(0);
+    setMyDetailOpen(false);
     setSelectedProduct({ ...detailProduct, ...product, heroImages: detailProduct.heroImages });
+  }
+
+  function handleTabChange(tab) {
+    setActiveTab(tab);
+    setSelectedProduct(null);
+    setReviewStep(0);
+    setMyDetailOpen(false);
   }
 
   let content;
@@ -346,7 +408,7 @@ function App() {
       />
     );
   } else if (reviewStep) {
-    content = <ReviewFlow step={reviewStep} onStep={setReviewStep} onDone={() => { setReviewStep(0); setActiveTab("home"); }} />;
+    content = <ReviewFlow step={reviewStep} onStep={setReviewStep} onDone={() => { setReviewStep(0); setActiveTab("home"); setMyDetailOpen(false); }} />;
   } else if (selectedProduct) {
     content = (
       <ProductDetail
@@ -360,20 +422,21 @@ function App() {
     );
   } else {
     content = (
-      <AppShell activeTab={activeTab} onTabChange={setActiveTab} onCart={() => setModal("cart")}>
+      <AppShell activeTab={activeTab} onTabChange={handleTabChange} onCart={() => setModal("cart")}>
         {activeTab === "home" && <HomeScreen products={products} onOpenProduct={openProduct} onToast={showToast} />}
         {activeTab === "delivery" && <DeliveryScreen onToast={showToast} onReview={() => setReviewStep(1)} onDate={() => setModal("date")} />}
         {activeTab === "category" && <CategoryScreen products={products} onOpenProduct={openProduct} onToast={showToast} />}
         {activeTab === "search" && <SearchScreen products={products} onOpenProduct={openProduct} onToast={showToast} />}
         {activeTab === "my" && (
-          <MyPage
-            choices={onboardingChoices}
-            onReset={() => {
-              setOnboardingStep(0);
-              setStage("onboarding");
-            }}
-            onToast={showToast}
-          />
+          myDetailOpen ? (
+            <MyPageDetail />
+          ) : (
+            <MyPage
+              choices={onboardingChoices}
+              onOpenDetail={() => setMyDetailOpen(true)}
+              onToast={showToast}
+            />
+          )
         )}
       </AppShell>
     );
@@ -792,43 +855,139 @@ function DeliveryScreen({ onToast, onReview, onDate }) {
   );
 }
 
-function MyPage({ choices, onReset, onToast }) {
+function MyPage({ choices, onOpenDetail, onToast }) {
+  const quickActions = [
+    { label: "Orders", Icon: PackageCheck, iconLeft: 34, iconTop: 1, labelLeft: 31, labelWidth: 35 },
+    { label: "Orders 0", Icon: Ticket, iconLeft: 132, iconTop: 5, labelLeft: 124, labelWidth: 45, highlight: true },
+    { label: "Orders 0", Icon: Heart, iconLeft: 230, iconTop: 4, labelLeft: 222, labelWidth: 45, highlight: true },
+    { label: "Orders", Icon: Bookmark, iconLeft: 322, iconTop: 0, labelLeft: 321, labelWidth: 35 }
+  ];
+
   return (
-    <div className="px-4 py-5">
-      <section className="flex items-center gap-3">
-        <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[#e8ffe9]">
-          <Logo className="text-[18px] text-[#008407]" />
-        </div>
-        <div>
-          <h1 className="text-[20px] font-semibold text-[#333]">NoBloat Member</h1>
-          <p className="mt-1 text-[13px] text-[#8a8a8a]">{choices.intolerance} · {choices.severity}</p>
-        </div>
-      </section>
-      <section className="mt-6 rounded-[8px] bg-[#e8ffe9] p-4">
-        <div className="grid grid-cols-2 divide-x divide-[#bfecc7] text-center">
-          <Stat label="Orders" value="6" />
-          <Stat label="Points" value="1,240" />
+    <div className="relative h-[1402px] bg-white font-body text-[#3b3b3b]">
+      <section className="absolute left-[20px] top-[20px] flex items-center">
+        <img src={asset("my/profile-avatar.png")} alt="Godae Kim" className="h-[52px] w-[52px] rounded-full object-cover" />
+        <div className="ml-[12px]">
+          <h1 className="text-[17px] leading-[20px] text-[#393939]">Godae Kim</h1>
+          <p className="mt-[2px] max-w-[245px] truncate text-[11px] leading-[13px] text-[#a5a5a5]">
+            Check Next Month's Level · View All Levels
+          </p>
         </div>
       </section>
-      <section className="mt-7 grid grid-cols-4 gap-3 text-center">
-        {["Coupons", "Saved", "Reviews", "Settings"].map((item) => (
-          <button key={item} onClick={() => onToast(`${item} is demo-only`)} className="rounded-[8px] bg-[#f7f7f7] px-1 py-4 text-[12px] text-[#555]">
-            {item}
-          </button>
-        ))}
+
+      <button
+        onClick={() => onToast(`${choices.intolerance} · ${choices.severity}`)}
+        className="absolute left-[333px] top-[28px] flex h-[32px] w-[32px] items-center justify-center text-[#707070]"
+        aria-label="Profile settings"
+        title="Profile settings"
+      >
+        <Settings size={24} strokeWidth={1.8} />
+      </button>
+
+      <section className="absolute left-[22px] top-[87px] h-[84px] w-[347px] rounded-[4px] border border-[#ececec] bg-white">
+        <div className="absolute left-[14px] top-[13px] text-[11px] leading-[13px] text-[#737373]">Rewards</div>
+        <div className="absolute left-[190px] top-[13px] text-[11px] leading-[13px] text-[#737373]">Trusty Cash</div>
+        <div className="absolute left-[276px] top-[10px] flex h-[25px] w-[55px] items-center justify-center rounded-full bg-[#f4f4f4] text-[11px] text-[#3a3a3a]">
+          Gift Card
+        </div>
+        <div className="absolute left-[15px] top-[42px] flex items-end gap-[3px]">
+          <span className="text-[13px] leading-[16px] text-[#3a3a3a]">₩</span>
+          <strong className="font-sans text-[17px] leading-[20px] font-extrabold text-[#3a3a3a]">0</strong>
+        </div>
+        <div className="absolute left-[190px] top-[42px] flex items-end gap-[3px]">
+          <span className="text-[13px] leading-[16px] text-[#3a3a3a]">₩</span>
+          <strong className="font-sans text-[17px] leading-[20px] font-extrabold text-[#3a3a3a]">0</strong>
+        </div>
       </section>
-      <section className="mt-8 space-y-3">
-        {["Delivery addresses", "Payment methods", "Retake symptom survey"].map((item) => (
+
+      <section className="absolute left-0 top-[201px] h-[58px] w-full text-center">
+        {quickActions.map(({ label, Icon, highlight, iconLeft, iconTop, labelLeft, labelWidth }, index) => (
           <button
-            key={item}
-            onClick={item.includes("survey") ? onReset : () => onToast(`${item} is disabled in this prototype`)}
-            className="flex h-[52px] w-full items-center justify-between border-b border-[#eeeeee] text-left text-[15px] text-[#333]"
+            key={`${label}-${index}`}
+            onClick={() => onToast(`${label} is demo-only`)}
+            className="absolute h-[58px] text-[11px] leading-[13px] text-[#3b3b3b]"
+            style={{ left: labelLeft, top: 0, width: labelWidth }}
           >
-            {item}
-            <ChevronRight size={18} className="text-[#a3a3a3]" />
+            <Icon size={31} strokeWidth={1.55} className="absolute text-[#4d4d4d]" style={{ left: iconLeft - labelLeft, top: iconTop }} />
+            <span className="absolute left-0 top-[42px] w-full">
+              {label.replace(" 0", "")}
+              {highlight && <span className="text-[#6b008d]"> 0</span>}
+            </span>
           </button>
         ))}
       </section>
+
+      <div className="absolute left-0 top-[296px] h-[9px] w-full bg-[#f4f4f4]" />
+
+      <MySavedSection top={355} section={myPageSections[0]} onOpenDetail={onOpenDetail} />
+      <MySavedSection top={800} section={myPageSections[1]} onOpenDetail={onOpenDetail} />
+
+      <div className="absolute left-0 top-[1250px] h-[9px] w-full bg-[#f4f4f4]" />
+      <section className="absolute left-[22px] top-[1280px] w-[340px] text-[15px] leading-[18px] text-[#4b4b4b]">
+        <p className="mb-[23px] text-[13px] leading-[15px] text-[#bdbdbd]">General Settings</p>
+        <div className="grid grid-cols-2 gap-y-[25px]">
+          <button onClick={() => onToast("App Settings is demo-only")} className="text-left">App Settings</button>
+          <button onClick={() => onToast("Language is demo-only")} className="text-left">Language</button>
+          <button onClick={() => onToast("Log out is disabled in this prototype")} className="text-left">Log Out</button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function MySavedSection({ top, section, onOpenDetail }) {
+  return (
+    <section className="absolute left-0 w-full" style={{ top }}>
+      <button onClick={onOpenDetail} className="absolute left-[18px] top-0 flex h-[22px] items-center gap-[17px] text-left text-[15px] leading-[18px] text-[#4b4b4b]">
+        <Bookmark size={18} strokeWidth={1.7} className="text-[#4d4d4d]" />
+        <span>{section.title}</span>
+      </button>
+      <div className="absolute left-[14px] top-[36px] grid grid-cols-2 gap-x-[8px] gap-y-[7px]">
+        {section.items.map((item) => (
+          <MySavedTile
+            key={`${section.id}-${item.alt}`}
+            item={item}
+            count={item.overlay ? section.count : null}
+            onOpenDetail={onOpenDetail}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function MySavedTile({ item, count, onOpenDetail }) {
+  return (
+    <button onClick={onOpenDetail} className="relative h-[174px] w-[173px] overflow-hidden bg-[#f5f5f5] text-left">
+      {item.crop === "cake" ? (
+        <img src={item.src} alt={item.alt} className="absolute left-0 top-[-122px] h-[364px] w-[173px] max-w-none object-cover" />
+      ) : item.crop === "roll" ? (
+        <img src={item.src} alt={item.alt} className="absolute left-[-14px] top-0 h-[410px] w-[195px] max-w-none object-cover" />
+      ) : (
+        <img src={item.src} alt={item.alt} className="h-full w-full object-cover" />
+      )}
+      {count && (
+        <span className="absolute inset-0 flex items-center justify-center bg-black/25 text-white">
+          <Plus size={32} strokeWidth={2.4} />
+          <span className="font-sans text-[37px] font-extrabold leading-[44px]">{count}</span>
+        </span>
+      )}
+    </button>
+  );
+}
+
+function MyPageDetail() {
+  return (
+    <div className="relative h-[1755px] bg-white">
+      {myDetailTiles.map((tile) => (
+        <img
+          key={`${tile.src}-${tile.x}-${tile.y}`}
+          src={tile.src}
+          alt={tile.alt}
+          className={`absolute object-cover ${tile.flip ? "scale-x-[-1]" : ""}`}
+          style={{ left: tile.x, top: tile.y, width: tile.w, height: tile.h }}
+        />
+      ))}
     </div>
   );
 }
