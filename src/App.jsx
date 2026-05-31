@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Bell,
   Bookmark,
-  CalendarDays,
   Check,
   ChevronDown,
   ChevronLeft,
@@ -10,10 +9,12 @@ import {
   CircleCheck,
   Coffee,
   Croissant,
+  Droplet,
   Heart,
   Home,
   ListFilter,
   MessageCircle,
+  Minus,
   Package,
   PackageCheck,
   Popcorn,
@@ -21,9 +22,12 @@ import {
   Search,
   Settings,
   Star,
+  Sun,
+  Tag,
   Ticket,
   Utensils,
-  UserRound
+  UserRound,
+  X
 } from "lucide-react";
 
 const asset = (path) => `/assets/${path}`;
@@ -314,6 +318,98 @@ const categories = [
 const keywordChips = ["Lacto-free", "Gluten-free", "Protein", "Milk", "Bakery", "Dessert", "Noodles", "Low sugar"];
 const symptoms = ["All", "Lactose intolerance", "Gluten intolerance", "Sensitive stomach"];
 
+const deliveryCalendarRows = [
+  [
+    { label: "31", muted: true },
+    { label: "1", dot: true },
+    { label: "2" },
+    { label: "3" },
+    { label: "4" },
+    { label: "5" },
+    { label: "6", green: true }
+  ],
+  [
+    { label: "7", green: true },
+    { label: "8", dot: true },
+    { label: "9" },
+    { label: "10" },
+    { label: "11" },
+    { label: "12" },
+    { label: "13", green: true }
+  ],
+  [
+    { label: "14", green: true },
+    { label: "15" },
+    { label: "16" },
+    { label: "17" },
+    { label: "18", dot: true },
+    { label: "19" },
+    { label: "20", green: true }
+  ],
+  [
+    { label: "21", green: true },
+    { label: "22", dot: true },
+    { label: "23" },
+    { label: "24" },
+    { label: "25", dot: true },
+    { label: "26" },
+    { label: "27", green: true }
+  ],
+  [
+    { label: "28", green: true },
+    { label: "29" },
+    { label: "30" },
+    { label: "1", muted: true },
+    { label: "2", muted: true },
+    { label: "3", muted: true },
+    { label: "4", muted: true }
+  ]
+];
+
+const deliverySections = [
+  {
+    title: "Shelf-stable Foods",
+    icon: Sun,
+    iconClass: "text-[#ff6b2d]",
+    items: [
+      {
+        name: "Odong-ri buckwheat noodle 500g",
+        image: asset("products/product-12.png")
+      }
+    ]
+  },
+  {
+    title: "Frozen Foods",
+    icon: Package,
+    iconClass: "text-[#5c9dff]",
+    items: [
+      {
+        name: "[Maeil] Cocoa in Milk Lacto-free 300mL",
+        image: asset("products/product-06.png")
+      },
+      {
+        name: "[Denmark] Digestible Milk Lacto-free P...",
+        image: asset("products/product-09.png")
+      }
+    ]
+  },
+  {
+    title: "Chilled Foods",
+    icon: Droplet,
+    iconClass: "text-[#54c6a5]",
+    items: [
+      {
+        name: "[Bangadduck] Glutenfree Handmade S...",
+        image: asset("products/product-18.png")
+      },
+      {
+        name: "[Salsalhadang Bakery] Gluten-free br...",
+        image: asset("products/product-14.png")
+      }
+    ]
+  }
+];
+
 const myPageSections = [
   {
     id: "gluten",
@@ -427,7 +523,17 @@ function App() {
       />
     );
   } else if (reviewStep) {
-    content = <ReviewFlow step={reviewStep} onStep={setReviewStep} onDone={() => { setReviewStep(0); setActiveTab("home"); setMyDetailOpen(false); }} />;
+    content = (
+      <ReviewFlow
+        step={reviewStep}
+        onStep={setReviewStep}
+        onDone={(tab = "home") => {
+          setReviewStep(0);
+          setActiveTab(tab);
+          setMyDetailOpen(false);
+        }}
+      />
+    );
   } else if (selectedProduct) {
     content = (
       <ProductDetail
@@ -995,35 +1101,168 @@ function CategoryScreen({ products, onOpenProduct, onToast }) {
 
 function DeliveryScreen({ onToast, onReview, onDate }) {
   return (
-    <div className="px-4 py-5">
-      <section className="rounded-[8px] border border-[#eeeeee] bg-white p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[13px] text-[#008407]">Next delivery</p>
-            <h1 className="mt-1 text-[20px] font-semibold text-[#333]">Arrives tomorrow morning</h1>
+    <div className="relative h-[1901px] bg-white font-body text-[#333]">
+      <section className="absolute left-0 top-0 h-[704px] w-full bg-white">
+        <h1 className="absolute left-[24px] top-[52px] w-[245px] text-[23px] leading-[27px] text-[#424242]">
+          You can delay delivery
+          <br />
+          for up to 4 weeks
+        </h1>
+        <p className="absolute left-[22px] top-[118px] text-[13px] leading-[15px] text-[#008407]">
+          Group 1 arrives on 00/8 (Mon) this week.
+        </p>
+
+        <div className="absolute left-[14px] top-[176px] w-[360px]">
+          <div className="grid grid-cols-3 text-center text-[17px] leading-[20px]">
+            <span className="text-[#c5c7c9]">2024.00</span>
+            <span className="text-[#424242]">2024.00</span>
+            <span className="text-[#c5c7c9]">2024.00</span>
           </div>
-          <button onClick={onDate} className="flex h-11 w-11 items-center justify-center rounded-full bg-[#e8ffe9] text-[#008407]">
-            <CalendarDays size={22} />
+          <div className="mt-[19px] grid grid-cols-7 gap-y-[23px] text-center text-[17px] leading-[20px]">
+            {deliveryCalendarRows.flatMap((row, rowIndex) =>
+              row.map((day, dayIndex) => (
+                <div key={`${rowIndex}-${dayIndex}-${day.label}`} className="flex h-[56px] flex-col items-center">
+                  <span className={day.muted ? "text-[#c5c7c9]" : day.green ? "text-[#008407]" : "text-[#424242]"}>
+                    {day.label}
+                  </span>
+                  {day.dot && <span className="mt-[13px] h-[8px] w-[8px] rounded-full bg-[#d9d9d9]" />}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <button
+          onClick={onDate}
+          className="absolute left-[28px] top-[605px] flex h-[37px] w-[331px] items-center justify-center rounded-[19px] border-2 border-[#008407] bg-white text-[12px] leading-[14px] text-[#008407]"
+        >
+          Change Delivery Date
+        </button>
+      </section>
+
+      <section className="absolute left-0 top-[703px] h-[63px] w-full bg-white text-[11px] text-[#4b4b4b]">
+        {["Group 01", "Group 02", "Group 03"].map((group, index) => (
+          <button
+            key={group}
+            onClick={index === 0 ? undefined : onDate}
+            className="absolute top-0 h-[63px] text-center"
+            style={{ left: index === 0 ? 22 : index === 1 ? 157 : 285, width: 80 }}
+          >
+            <span className="relative inline-block pt-[1px] text-[11px] leading-[13px]">
+              {group}
+              <span className="absolute -right-[9px] -top-[7px] h-[8px] w-[8px] rounded-full bg-[#d9d9d9]" />
+            </span>
+            {index === 0 && <span className="absolute bottom-0 left-0 h-[2px] w-[81px] bg-[#333333]" />}
           </button>
+        ))}
+      </section>
+
+      <section className="absolute left-[22px] top-[763px] w-[347px]">
+        <p className="text-[11px] leading-[13px] text-[#008407]">Delivery</p>
+        <p className="mt-[5px] w-[297px] text-[15px] leading-[18px] text-[#2c2c2c]">
+          Room 902, Media Building, 145 Anam-ro,
+          <br />
+          Seongbuk-gu, Seoul
+        </p>
+        <button
+          onClick={() => onToast("Delivery address is demo-only")}
+          className="absolute right-0 top-[23px] h-[31px] w-[47px] rounded-[4px] border border-[#eeeeee] text-[11px] leading-[13px] text-[#343434]"
+        >
+          Change
+        </button>
+      </section>
+
+      <section className="absolute left-[23px] top-[845px] w-[344px]">
+        <div className="flex items-end gap-[4px]">
+          <strong className="font-sans text-[17px] font-extrabold leading-[20px] text-[#008407]">₩0,000</strong>
+          <span className="pb-[2px] text-[9px] leading-[11px] text-[#323232]">Add ₩0,000 more to order</span>
         </div>
-        <div className="mt-6 h-2 rounded-full bg-[#eeeeee]">
-          <div className="h-2 w-[72%] rounded-full bg-[#008407]" />
-        </div>
-        <div className="mt-4 grid grid-cols-4 text-center text-[11px] text-[#7a7a7a]">
-          {["Ordered", "Packed", "Shipping", "Arrived"].map((item, index) => (
-            <span key={item} className={index < 3 ? "text-[#008407]" : ""}>{item}</span>
-          ))}
+        <div className="mt-[10px] flex items-center gap-[8px]">
+          <div className="h-[5px] w-[291px] overflow-hidden rounded-full bg-[#e8ffe9]">
+            <div className="h-full w-[264px] rounded-full bg-[#008407]" />
+          </div>
+          <PackageCheck size={18} strokeWidth={1.8} className="text-[#008407]" />
         </div>
       </section>
-      <section className="mt-6 rounded-[8px] border border-[#eeeeee] p-4">
-        <h2 className="text-[17px] text-[#404040]">Delivery list</h2>
-        <DeliveryItem name={products[0].name} image={products[0].image} status="Out for delivery" />
-        <DeliveryItem name={detailProduct.name} image={detailProduct.image} status="Delivered" />
+
+      <section className="absolute left-0 top-[912px] flex h-[73px] w-full items-center justify-between border-t border-[#f2f2f2] bg-white px-[13px]">
+        <button className="flex items-center gap-[14px] text-[17px] leading-[20px] text-[#333333]">
+          <CircleCheck size={18} className="fill-[#008407] text-white" />
+          Select All (0/0)
+        </button>
+        <button onClick={() => onToast("Delete is demo-only")} className="pr-[14px] text-[15px] leading-[18px] text-[#666666]">
+          Delete
+        </button>
       </section>
-      <button onClick={onReview} className="mt-5 h-[52px] w-full rounded-[8px] bg-[#008407] text-[17px] font-semibold text-white">
-        Write a review
-      </button>
+
+      <div className="absolute left-0 top-[985px] w-full border-t-[5px] border-[#f4f4f4]">
+        {deliverySections.map((section, index) => (
+          <DeliverySection
+            key={section.title}
+            section={section}
+            first={index === 0}
+            onReview={index === 2 ? onReview : undefined}
+            onToast={onToast}
+          />
+        ))}
+      </div>
     </div>
+  );
+}
+
+function DeliverySection({ section, first, onReview, onToast }) {
+  const Icon = section.icon;
+  return (
+    <section className={`${first ? "" : "border-t-[5px] border-[#f4f4f4]"} bg-white`}>
+      <h2 className="flex h-[61px] items-center gap-[12px] px-[14px] text-[19px] leading-[22px] text-[#343434]">
+        <Icon size={16} strokeWidth={1.7} className={section.iconClass} />
+        {section.title}
+      </h2>
+      {section.items.map((item, index) => (
+        <DeliveryProductRow
+          key={item.name}
+          product={item}
+          onClick={onReview && index === 0 ? onReview : undefined}
+          onToast={onToast}
+        />
+      ))}
+    </section>
+  );
+}
+
+function DeliveryProductRow({ product, onClick, onToast }) {
+  const Wrapper = onClick ? "button" : "div";
+  return (
+    <article className="relative h-[155px] border-t border-[#f3f3f3] bg-white">
+      <CircleCheck size={18} className="absolute left-[13px] top-[17px] fill-[#008407] text-white" />
+      <Wrapper
+        onClick={onClick}
+        className={`absolute left-[55px] top-[15px] max-w-[284px] truncate text-left text-[15px] leading-[18px] text-[#3a3a3a] ${onClick ? "cursor-pointer" : ""}`}
+      >
+        {product.name}
+      </Wrapper>
+      <button onClick={() => onToast("Item removed from this delivery group")} className="absolute right-[15px] top-[16px] text-[#d4d4d4]" aria-label="Remove item">
+        <X size={19} strokeWidth={1.4} />
+      </button>
+      <img
+        src={product.image}
+        alt={product.name}
+        width="118"
+        height="154"
+        className="absolute left-[55px] top-[51px] h-[77px] w-[59px] object-contain"
+        loading="lazy"
+      />
+      <strong className="absolute left-[135px] top-[51px] font-sans text-[15px] font-extrabold leading-[18px] text-[#2a2a2a]">₩0,000</strong>
+      <div className="absolute left-[89px] top-[96px] grid h-[31px] w-[66px] grid-cols-3 items-center rounded-[2px] border border-[#eeeeee] bg-white text-center text-[15px] leading-[18px] text-[#333333]">
+        <button onClick={() => onToast("Quantity controls are demo-only")} className="flex h-full items-center justify-center text-[#d6d6d6]" aria-label="Decrease quantity">
+          <Minus size={12} />
+        </button>
+        <span>0</span>
+        <button onClick={() => onToast("Quantity controls are demo-only")} className="flex h-full items-center justify-center text-[#d6d6d6]" aria-label="Increase quantity">
+          <Plus size={12} />
+        </button>
+      </div>
+    </article>
   );
 }
 
@@ -1253,43 +1492,161 @@ function ProductDetail({ product, products, onBack, onOpenProduct, onToast, onBu
 }
 
 function ReviewFlow({ step, onStep, onDone }) {
-  const [rating, setRating] = useState(0);
-  const [text, setText] = useState("");
-  if (step === 5) {
+  const [rating, setRating] = useState(5);
+  const [digestionTag, setDigestionTag] = useState("No stomachache");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (step !== 4) return undefined;
+    const timer = window.setTimeout(() => onStep(5), 1500);
+    return () => window.clearTimeout(timer);
+  }, [step, onStep]);
+
+  if (step === 1) {
     return (
-      <CenteredPanel title="Review submitted" subtitle="Thank you for helping other shoppers choose the right food.">
-        <PrimaryButton onClick={onDone}>Complete</PrimaryButton>
-      </CenteredPanel>
+      <ReviewShell title="Orders" step={1} onNav={onDone}>
+        <div className="absolute left-0 top-[316px] flex w-full items-center justify-center gap-[11px]">
+          <span className="text-[20px] leading-[20px]" role="img" aria-label="Notification">🔔</span>
+          <h1 className="font-sans text-[20px] font-bold leading-[24px] text-[#008407]">Notification</h1>
+        </div>
+        <section className="absolute left-[19px] top-[355px] h-[122px] w-[350px] rounded-[20px] bg-[#e8ffe9]">
+          <div className="absolute left-[14px] top-[17px] flex h-[85px] w-[85px] items-center justify-center rounded-[10px] bg-white">
+            <img src={customSearchProduct.image} alt={customSearchProduct.name} className="h-[72px] w-[78px] object-contain" />
+          </div>
+          <h2 className="absolute left-[110px] top-[29px] w-[232px] truncate text-[12px] leading-[14px] text-[#333333]">
+            {customSearchProduct.name}
+          </h2>
+          <p className="absolute left-[116px] top-[51px] text-[12.5px] leading-[15px] text-[#888888]">200g · Lacto-free</p>
+          <p className="absolute left-[116px] top-[78px] font-sans text-[16px] font-bold leading-[24px] text-[#008407]">
+            6,000<span className="font-normal">₩</span>
+          </p>
+        </section>
+        <p className="absolute left-0 top-[515px] w-full text-center text-[16px] leading-[19px] text-[#666666]">Send us a review!</p>
+        <ReviewButton onClick={() => onStep(2)}>Write Review</ReviewButton>
+      </ReviewShell>
     );
   }
-  return (
-    <div className="flex h-full flex-col bg-white px-6 pb-10 pt-[74px]">
-      <h1 className="text-[24px] font-semibold text-[#333]">{step === 1 ? "How was your meal?" : step === 2 ? "Rate the product" : step === 3 ? "Tell us more" : "Ready to submit?"}</h1>
-      <p className="mt-2 text-[14px] leading-5 text-[#777]">Your feedback stays inside this prototype and does not require login.</p>
-      <div className="mt-8 rounded-[10px] border border-[#eeeeee] p-4">
-        <DeliveryItem name={detailProduct.name} image={detailProduct.image} status="Delivered" />
-      </div>
-      {step >= 2 && (
-        <div className="mt-8 flex justify-center gap-2 text-[#008407]">
-          {[1, 2, 3, 4, 5].map((value) => (
-            <button key={value} onClick={() => setRating(value)} aria-label={`Rating ${value}`}>
-              <Star size={34} fill={rating >= value ? "currentColor" : "none"} />
+
+  if (step === 2) {
+    const tags = ["No stomachache", "Little bit off", "Severe"];
+    return (
+      <ReviewShell title="Writing a Review" step={2} onNav={onDone}>
+        <div className="absolute left-[64px] top-[306px] flex items-center gap-[10px]">
+          <Tag size={19} strokeWidth={2} className="text-[#008407]" />
+          <h1 className="font-sans text-[18px] font-bold leading-[22px] text-[#008407]">Digestion Tag (Required)</h1>
+        </div>
+        <div className="absolute left-[45px] top-[353px] flex gap-[26px] text-[15px] leading-[18px]">
+          {tags.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setDigestionTag(tag)}
+              className={`relative h-[29px] ${digestionTag === tag ? "text-[#008407]" : "text-[#b3b3b3]"}`}
+            >
+              {tag}
+              {digestionTag === tag && <span className="absolute bottom-0 left-0 h-[1px] w-full bg-[#008407]" />}
             </button>
           ))}
         </div>
-      )}
-      {step >= 3 && (
+        <h2 className="absolute left-0 top-[474px] w-full text-center text-[20px] leading-[24px] text-[#333333]">Rate</h2>
+        <div className="absolute left-0 top-[498px] flex w-full justify-center gap-[1px] text-[#f5a623]">
+          {[1, 2, 3, 4, 5].map((value) => (
+            <button key={value} onClick={() => setRating(value)} aria-label={`Rating ${value}`} className="h-[24px] w-[21px] text-[20px] leading-[24px]">
+              <Star size={20} fill={rating >= value ? "currentColor" : "none"} strokeWidth={0} />
+            </button>
+          ))}
+        </div>
+        <ReviewButton onClick={() => onStep(3)}>Next</ReviewButton>
+      </ReviewShell>
+    );
+  }
+
+  if (step === 3) {
+    return (
+      <ReviewShell title="Writing a Review" step={3} onNav={onDone}>
+        <h1 className="absolute left-[60px] top-[286px] w-[270px] text-center text-[14px] leading-[17px] text-[#333333]">
+          {customSearchProduct.name}
+        </h1>
         <textarea
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          placeholder="Write about taste, packaging, and how you felt."
-          className="mt-8 h-[160px] resize-none rounded-[10px] bg-[#f7f7f7] p-4 text-[15px] outline-none"
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+          placeholder="Leave a message (Optional)..."
+          className="absolute left-[19px] top-[325px] h-[231px] w-[350px] resize-none rounded-[20px] bg-[#e8ffe9] px-[16px] py-[17px] text-[12.5px] leading-[15px] text-[#333333] outline-none placeholder:text-[#bbbbbb]"
         />
-      )}
-      <PrimaryButton className="mt-auto" onClick={() => onStep(step === 4 ? 5 : step + 1)}>
-        {step === 4 ? "Submit Review" : "Next"}
-      </PrimaryButton>
+        <ReviewButton onClick={() => onStep(4)}>Submit Review</ReviewButton>
+      </ReviewShell>
+    );
+  }
+
+  if (step === 4) {
+    return (
+      <ReviewShell title="Review Confirmed" step={4} onNav={onDone}>
+        <div className="absolute left-0 top-[316px] flex w-full items-center justify-center gap-[13px]">
+          <CircleCheck size={20} className="fill-[#008407] text-white" />
+          <h1 className="font-sans text-[20px] font-bold leading-[24px] text-[#008407]">Review Confirmed!</h1>
+        </div>
+        <section className="absolute left-[19px] top-[371px] flex h-[139px] w-[350px] flex-col items-center justify-center rounded-[20px] bg-[#e8ffe9] text-center text-[14px] leading-[17px] text-[#333333]">
+          <p>This review will be helpful</p>
+          <p className="mt-[13px]">to 28 people in similar situations!</p>
+        </section>
+        <p className="absolute left-0 top-[592px] w-full text-center font-sans text-[22px] font-bold leading-[27px] text-[#008407]">+ 400P</p>
+        <p className="absolute left-0 top-[625px] w-full text-center text-[18px] leading-[21px] text-[#008407]">Review Point Saved!</p>
+      </ReviewShell>
+    );
+  }
+
+  return (
+    <ReviewShell title="NoBloat" onNav={onDone}>
+      <h1 className="absolute left-0 top-[279px] w-full text-center font-sans text-[20px] font-bold leading-[24px] text-[#008407]">
+        Contribution to Community
+      </h1>
+      <section className="absolute left-[19px] top-[343px] flex h-[168px] w-[350px] flex-col items-center justify-center rounded-[20px] bg-[#e8ffe9] text-center text-[18px] leading-[21px] text-[#333333]">
+        <p>Reviews can help</p>
+        <p className="mt-[16px]">others to cope with</p>
+        <p className="mt-[16px]">indigestion!</p>
+      </section>
+      <ReviewButton onClick={() => onDone("home")}>Return to Home</ReviewButton>
+    </ReviewShell>
+  );
+}
+
+function ReviewShell({ title, step, children, onNav }) {
+  return (
+    <div className="relative h-full bg-white font-body text-[#333333]">
+      <header className="absolute left-0 top-0 h-[132px] w-full bg-[#008407]">
+        <h1 className="absolute left-0 top-[66px] w-full text-center font-logo text-[26px] leading-[30px] tracking-[1.1px] text-white">
+          {title}
+        </h1>
+      </header>
+      {step && <ReviewProgress step={step} />}
+      {children}
+      <BottomNav activeTab="delivery" onTabChange={onNav} />
     </div>
+  );
+}
+
+function ReviewProgress({ step }) {
+  const widths = { 1: 93, 2: 184, 3: 244, 4: 350 };
+  const labels = { 1: 51, 2: 95, 3: 194, 4: 293 };
+  return (
+    <div className="absolute left-[20px] top-[182px] h-[28px] w-[350px]">
+      <div className="h-[8px] overflow-hidden rounded-full bg-[#e5fbe8]">
+        <div className="h-full rounded-full bg-[#008407]" style={{ width: widths[step] }} />
+      </div>
+      <p className="absolute top-[14px] font-sans text-[10px] font-bold leading-[12px] text-[#008407]" style={{ left: labels[step] }}>
+        Step {step}
+      </p>
+    </div>
+  );
+}
+
+function ReviewButton({ children, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute left-[70px] top-[636px] flex h-[52px] w-[249px] items-center justify-center rounded-[20px] bg-[#008407] font-sans text-[20px] font-bold leading-[24px] text-white"
+    >
+      {children}
+    </button>
   );
 }
 
@@ -1328,19 +1685,44 @@ function CartSheet({ products, onClose }) {
 }
 
 function DateSheet({ onClose }) {
+  const [selectedGroup, setSelectedGroup] = useState("Group 1");
+  const address = "Room 902, Media Building, 145 Anam-ro,\nSeongbuk-gu, Seoul";
+
   return (
-    <div className="absolute inset-0 z-40 flex items-end bg-black/30">
-      <section className="w-full rounded-t-[24px] bg-white px-5 pb-7 pt-4">
-        <div className="mx-auto h-1 w-9 rounded-full bg-[#cfcfcf]" />
-        <h2 className="mt-6 text-[20px] font-semibold text-[#333]">Select delivery date</h2>
-        <div className="mt-5 grid grid-cols-7 gap-2 text-center">
-          {Array.from({ length: 28 }, (_, index) => (
-            <button key={index} className={`h-10 rounded-[8px] text-[13px] ${[2, 8, 14].includes(index) ? "bg-[#008407] text-white" : "bg-[#f5f5f5] text-[#555]"}`}>
-              {index + 1}
+    <div className="absolute inset-0 z-40 flex items-end bg-transparent">
+      <section className="relative h-[652px] w-full bg-white shadow-[0_-3px_12px_rgba(0,0,0,0.18)]">
+        <div className="absolute left-[177px] top-0 h-[13px] w-[32px] bg-[#ff0000]" />
+        <div className="absolute left-[178px] top-[23px] h-[7px] w-[33px] rounded-full bg-[#d7d7d7]" />
+
+        {[
+          { group: "Group 1", date: "Expected Date: 00/8", top: 66 },
+          { group: "Group 2", date: "Expected Date: 00/00", top: 236 },
+          { group: "Group 3", date: "Expected Date: 00/00", top: 402 }
+        ].map(({ group, date, top }) => (
+          <section key={group} className="absolute left-[38px] w-[334px]" style={{ top }}>
+            <div className="flex items-end gap-[15px]">
+              <h2 className="font-sans text-[17px] font-extrabold leading-[20px] text-[#008407]">{group}</h2>
+              <p className="pb-[1px] font-sans text-[11px] font-semibold leading-[13px] text-[#008407]">{date}</p>
+            </div>
+            <p className="mt-[13px] whitespace-pre-line text-[15px] leading-[18px] text-[#2c2c2c]">{address}</p>
+            <button
+              onClick={() => setSelectedGroup(group)}
+              className={`ml-[43px] mt-[27px] flex h-[38px] w-[238px] items-center justify-center rounded-[19px] border text-[15px] leading-[18px] ${
+                selectedGroup === group
+                  ? "border-[#008407] bg-[#e8ffe9] text-[#008407]"
+                  : "border-[#f2f2f2] bg-white text-[#4b4b4b]"
+              }`}
+            >
+              Choose a Date
             </button>
-          ))}
-        </div>
-        <PrimaryButton className="mt-6" onClick={onClose}>Confirm</PrimaryButton>
+          </section>
+        ))}
+
+        <footer className="absolute bottom-0 left-0 flex h-[93px] w-full items-center justify-center bg-white">
+          <button onClick={onClose} className="flex h-[40px] w-[115px] items-center justify-center rounded-[6px] bg-[#008407] text-[17px] leading-[20px] text-white">
+            Confirm
+          </button>
+        </footer>
       </section>
     </div>
   );
