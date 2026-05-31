@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Bell,
   Bookmark,
@@ -291,6 +291,18 @@ const detailProduct = {
   ]
 };
 
+const customSearchProduct = {
+  id: 100,
+  name: "[Maeil] Bio Lacto-free Plain Greek Yogurt",
+  oldPrice: 7500,
+  price: 6000,
+  discount: "20%",
+  symptom: "Moderate lactose intolerance",
+  tags: ["Lacto-free", "Greek yogurt", "Plain"],
+  categoryLabel: "Yogurt",
+  image: asset("my/lacto-yogurt.png")
+};
+
 const categories = [
   { id: "milk", name: "Lacto-free Milk", detail: "Milk, cocoa milk, daily packs", count: 5 },
   { id: "protein", name: "Protein", detail: "Powder, ready-to-drink protein", count: 3 },
@@ -368,6 +380,7 @@ function App() {
   const [reviewStep, setReviewStep] = useState(0);
   const [toast, setToast] = useState("");
   const [modal, setModal] = useState(null);
+  const [modalProduct, setModalProduct] = useState(null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setStage("onboarding"), 1000);
@@ -382,7 +395,13 @@ function App() {
   function openProduct(product = detailProduct) {
     setReviewStep(0);
     setMyDetailOpen(false);
+    setModalProduct(null);
     setSelectedProduct({ ...detailProduct, ...product, heroImages: detailProduct.heroImages });
+  }
+
+  function openBuyModal(product = null) {
+    setModalProduct(product);
+    setModal("buy");
   }
 
   function handleTabChange(tab) {
@@ -417,7 +436,7 @@ function App() {
         onBack={() => setSelectedProduct(null)}
         onOpenProduct={openProduct}
         onToast={showToast}
-        onBuy={() => setModal("buy")}
+        onBuy={() => openBuyModal(null)}
       />
     );
   } else {
@@ -426,7 +445,7 @@ function App() {
         {activeTab === "home" && <HomeScreen products={products} onOpenProduct={openProduct} onToast={showToast} />}
         {activeTab === "delivery" && <DeliveryScreen onToast={showToast} onReview={() => setReviewStep(1)} onDate={() => setModal("date")} />}
         {activeTab === "category" && <CategoryScreen products={products} onOpenProduct={openProduct} onToast={showToast} />}
-        {activeTab === "search" && <SearchScreen products={products} onOpenProduct={openProduct} onToast={showToast} />}
+        {activeTab === "search" && <SearchScreen onToast={showToast} onBuy={openBuyModal} />}
         {activeTab === "my" && (
           myDetailOpen ? (
             <MyPageDetail />
@@ -447,7 +466,7 @@ function App() {
       <section className="relative h-[844px] w-[390px] overflow-hidden bg-white shadow-phone">
         {content}
         {toast && <Toast>{toast}</Toast>}
-        {modal === "buy" && <BuyModal product={selectedProduct || detailProduct} onClose={() => setModal(null)} />}
+        {modal === "buy" && <BuyModal product={modalProduct || selectedProduct || detailProduct} onClose={() => { setModal(null); setModalProduct(null); }} />}
         {modal === "cart" && <CartSheet products={products.slice(0, 2)} onClose={() => setModal(null)} />}
         {modal === "date" && <DateSheet onClose={() => setModal(null)} />}
       </section>
@@ -742,43 +761,173 @@ function ProductCard({ product, onOpenProduct, onToast }) {
   );
 }
 
-function SearchScreen({ products, onOpenProduct, onToast }) {
-  const [query, setQuery] = useState("");
-  const [activeChip, setActiveChip] = useState("Lacto-free");
-  const [activeSymptom, setActiveSymptom] = useState("All");
+function SearchScreen({ onToast, onBuy }) {
+  const [view, setView] = useState("search");
 
-  const results = useMemo(() => {
-    const searchValue = query || activeChip;
-    return products.filter((product) => {
-      const haystack = [product.name, product.categoryLabel, product.symptom, ...product.tags].join(" ").toLowerCase();
-      const matchesQuery = !searchValue || haystack.includes(searchValue.toLowerCase());
-      const matchesSymptom = activeSymptom === "All" || product.symptom === activeSymptom;
-      return matchesQuery && matchesSymptom;
-    });
-  }, [activeChip, activeSymptom, products, query]);
+  if (view === "custom2") {
+    return <CustomSearchProductMatch onNext={() => setView("custom3")} />;
+  }
+
+  if (view === "custom3") {
+    return <CustomSearchSafety onNext={() => setView("custom4")} />;
+  }
+
+  if (view === "custom4") {
+    return <CustomSearchPurchase onToast={onToast} onBuy={() => onBuy(customSearchProduct)} />;
+  }
 
   return (
-    <div className="px-4 py-3">
-      <label className="flex h-[41px] items-center gap-3 rounded-[10px] bg-[#f2f2f2] px-3">
-        <Search size={18} className="text-[#5c5c5c]" />
+    <SearchKeywordPage
+      onKeyword={() => setView("custom1")}
+      onSimilar={() => setView("custom2")}
+    />
+  );
+}
+
+function SearchKeywordPage({ onKeyword, onSimilar }) {
+  const recent = [
+    { label: "Lacto free", x: 16, y: 102 },
+    { label: "Tofu snack", x: 119, y: 102 },
+    { label: "Gluten free", x: 226, y: 102 },
+    { label: "Soy bean milk", x: 16, y: 146 },
+    { label: "Almond milk", x: 145, y: 146 }
+  ];
+  const hot = [
+    { label: "Tofu", x: 16, y: 248 },
+    { label: "Oat Drink", x: 85, y: 248 },
+    { label: "Gluten free", x: 186, y: 248 },
+    { label: "Low sugar", x: 16, y: 292 },
+    { label: "Rice cracker", x: 122, y: 292 },
+    { label: "Noodle", x: 236, y: 292 },
+    { label: "Soy bean milk", x: 16, y: 336 },
+    { label: "Cream Cheese", x: 145, y: 336 }
+  ];
+
+  return (
+    <div className="relative h-[650px] bg-white font-body text-[#333]">
+      <label className="absolute left-[16px] top-[12px] flex h-[41px] w-[356px] items-center rounded-[4px] bg-[#f2f2f2] px-[11px]">
+        <Search size={18} strokeWidth={1.8} className="text-[#777]" />
         <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search TrustyMeal"
-          className="w-full bg-transparent text-[14px] outline-none placeholder:text-[#9d9d9d]"
+          onFocus={onKeyword}
+          placeholder="Enter a keyword..."
+          className="ml-[13px] w-full bg-transparent text-[13px] leading-[15px] outline-none placeholder:text-[#989898]"
         />
       </label>
-      <SearchBlock title="Search keywords">
-        <ChipCloud chips={keywordChips} active={activeChip} onSelect={(chip) => { setActiveChip(chip); setQuery(chip); }} />
-      </SearchBlock>
-      <SearchBlock title="Similar symptom filter">
-        <ChipCloud chips={symptoms} active={activeSymptom} onSelect={setActiveSymptom} />
-      </SearchBlock>
-      <div className="mt-7 grid grid-cols-2 gap-x-[29px] gap-y-[14px] px-1">
-        {(results.length ? results : products).slice(0, 8).map((product) => (
-          <ProductCard key={product.id} product={product} onOpenProduct={onOpenProduct} onToast={onToast} />
-        ))}
-      </div>
+
+      <h1 className="absolute left-[20px] top-[69px] text-[15px] leading-[18px]">Recent Keyword</h1>
+      {recent.map((chip) => (
+        <SearchPill key={chip.label} {...chip} onClick={onKeyword} />
+      ))}
+
+      <h2 className="absolute left-[20px] top-[213px] text-[15px] leading-[18px]">Hot Keyword</h2>
+      {hot.map((chip) => (
+        <SearchPill key={chip.label} {...chip} onClick={onKeyword} hot />
+      ))}
+
+      <button
+        onClick={onSimilar}
+        className="absolute left-1/2 top-[456px] flex h-[35px] -translate-x-1/2 items-center justify-center whitespace-nowrap rounded-[18px] border-2 border-[#008407] bg-[#e8ffe9] px-[16px] pb-[1px] text-[13px] leading-[15px] text-[#008407]"
+      >
+        View products only with similar symptoms
+      </button>
+    </div>
+  );
+}
+
+function SearchPill({ label, x, y, hot = false, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`absolute flex h-[34px] items-center justify-center rounded-[18px] px-[16px] pb-[1px] text-[13px] leading-[15px] ${
+        hot ? "bg-[#e8ffe9] text-[#008407]" : "border border-[#f1f1f1] bg-white text-[#4b4b4b]"
+      }`}
+      style={{ left: x, top: y }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function CustomSearchProductMatch({ onNext }) {
+  return (
+    <div className="relative h-[650px] bg-white font-body text-[#333]">
+      <button onClick={onNext} className="absolute left-[48px] top-[149px] h-[276px] w-[293px] rounded-[20px] bg-[#e8ffe9]/60">
+        <span className="absolute left-[42px] top-[18px] flex h-[163px] w-[209px] items-center justify-center rounded-[10px] bg-white">
+          <img src={customSearchProduct.image} alt={customSearchProduct.name} className="h-[132px] w-[170px] object-contain" />
+        </span>
+        <span className="absolute left-[10px] top-[203px] w-[270px] whitespace-nowrap text-center text-[14px] leading-[17px]">
+          {customSearchProduct.name}
+        </span>
+        <span className="absolute left-0 top-[233px] w-full text-center font-sans text-[16px] font-bold leading-[24px] text-[#008407]">
+          6,000<span className="font-normal">₩</span>
+        </span>
+      </button>
+
+      <button
+        onClick={onNext}
+        className="absolute left-1/2 top-[456px] flex h-[49px] w-[188px] -translate-x-1/2 items-center justify-center rounded-[18px] border-2 border-[#008407] bg-[#e8ffe9] text-center text-[13px] leading-[15px] text-[#008407]"
+      >
+        <span>
+          91% of users with similar
+          <br />
+          symptoms said trusty!
+        </span>
+      </button>
+    </div>
+  );
+}
+
+function CustomSearchSafety({ onNext }) {
+  return (
+    <div className="relative h-[650px] bg-white font-body text-[#333]">
+      <button onClick={onNext} className="absolute left-[49px] top-[112px] h-[123px] w-[293px] rounded-[20px] border border-[#008407] bg-[#e8ffe9]/60 text-left">
+        <span className="absolute left-[16px] top-[18px] font-sans text-[20px] font-bold leading-[24px] text-[#008407]">Safety Index</span>
+        <span className="absolute right-[15px] top-[10px] font-sans text-[40px] font-bold leading-[48px] text-[#008407]">91%</span>
+        <span className="absolute left-[16px] top-[73px] text-[14px] leading-[17px]">
+          Moderate lactose intolerance
+          <br />
+          31 out of 34 said trusty (91%)
+        </span>
+      </button>
+
+      <h1 className="absolute left-[22px] top-[296px] font-sans text-[18px] font-bold leading-[22px] text-[#008407]">Review</h1>
+      <button onClick={onNext} className="absolute left-[19px] top-[331px] flex h-[35px] w-[205px] items-center justify-center rounded-[10px] border border-[#008407] bg-[#e8ffe9] text-[13px] leading-[15px] text-[#008407]">
+        Only with similar symptoms
+      </button>
+
+      <button onClick={onNext} className="absolute left-[22px] top-[385px] h-[231px] w-[350px] rounded-[20px] bg-[#e8ffe9]/60 text-left">
+        <span className="absolute left-[16px] top-[27px] flex flex-col gap-[17px] text-[12.5px] leading-[15px] text-[#bbbbbb]">
+          {Array.from({ length: 6 }, (_, index) => (
+            <span key={index}>"No stomachache 😊"</span>
+          ))}
+        </span>
+      </button>
+    </div>
+  );
+}
+
+function CustomSearchPurchase({ onToast, onBuy }) {
+  return (
+    <div className="relative h-[650px] bg-white font-body text-[#333]">
+      <h1 className="absolute left-0 top-[158px] w-full text-center font-sans text-[20px] font-bold leading-[24px] text-[#008407]">Purchase</h1>
+
+      <section className="absolute left-[19px] top-[205px] h-[123px] w-[350px] rounded-[20px] bg-[#e8ffe9]/60">
+        <div className="absolute left-[14px] top-[19px] flex h-[85px] w-[85px] items-center justify-center rounded-[10px] bg-white">
+          <img src={customSearchProduct.image} alt={customSearchProduct.name} className="h-[64px] w-[74px] object-contain" />
+        </div>
+        <h2 className="absolute left-[109px] top-[28px] whitespace-nowrap text-[12px] leading-[14px]">{customSearchProduct.name}</h2>
+        <p className="absolute left-[116px] top-[54px] text-[12.5px] leading-[15px] text-[#888]">200g · Lacto-free</p>
+        <p className="absolute left-[116px] top-[81px] font-sans text-[16px] font-bold leading-[24px] text-[#008407]">
+          6,000<span className="font-normal">₩</span>
+        </p>
+      </section>
+
+      <button onClick={() => onToast(`${customSearchProduct.name} added to cart`)} className="absolute left-[70px] top-[453px] h-[52px] w-[249px] rounded-[20px] bg-[#008407] font-sans text-[20px] font-bold text-white">
+        Add to Cart
+      </button>
+      <button onClick={onBuy} className="absolute left-[70px] top-[523px] h-[52px] w-[249px] rounded-[20px] bg-[#008407] font-sans text-[20px] font-bold text-white">
+        Buy It Now
+      </button>
     </div>
   );
 }
