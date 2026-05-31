@@ -763,6 +763,12 @@ function ProductCard({ product, onOpenProduct, onToast }) {
 
 function SearchScreen({ onToast, onBuy }) {
   const [view, setView] = useState("search");
+  const [selectedKeyword, setSelectedKeyword] = useState("");
+
+  function selectKeyword(keyword) {
+    setSelectedKeyword(keyword);
+    setView("custom1");
+  }
 
   if (view === "custom2") {
     return <CustomSearchProductMatch onNext={() => setView("custom3")} />;
@@ -778,13 +784,14 @@ function SearchScreen({ onToast, onBuy }) {
 
   return (
     <SearchKeywordPage
-      onKeyword={() => setView("custom1")}
+      selectedKeyword={selectedKeyword}
+      onKeyword={selectKeyword}
       onSimilar={() => setView("custom2")}
     />
   );
 }
 
-function SearchKeywordPage({ onKeyword, onSimilar }) {
+function SearchKeywordPage({ selectedKeyword, onKeyword, onSimilar }) {
   const recent = [
     { label: "Lacto free", x: 16, y: 102 },
     { label: "Tofu snack", x: 119, y: 102 },
@@ -808,7 +815,8 @@ function SearchKeywordPage({ onKeyword, onSimilar }) {
       <label className="absolute left-[16px] top-[12px] flex h-[41px] w-[356px] items-center rounded-[4px] bg-[#f2f2f2] px-[11px]">
         <Search size={18} strokeWidth={1.8} className="text-[#777]" />
         <input
-          onFocus={onKeyword}
+          value={selectedKeyword}
+          onChange={(event) => onKeyword(event.target.value)}
           placeholder="Enter a keyword..."
           className="ml-[13px] w-full bg-transparent text-[13px] leading-[15px] outline-none placeholder:text-[#989898]"
         />
@@ -816,12 +824,12 @@ function SearchKeywordPage({ onKeyword, onSimilar }) {
 
       <h1 className="absolute left-[20px] top-[69px] text-[15px] leading-[18px]">Recent Keyword</h1>
       {recent.map((chip) => (
-        <SearchPill key={chip.label} {...chip} onClick={onKeyword} />
+        <SearchPill key={chip.label} {...chip} selected={selectedKeyword === chip.label} onClick={onKeyword} />
       ))}
 
       <h2 className="absolute left-[20px] top-[213px] text-[15px] leading-[18px]">Hot Keyword</h2>
       {hot.map((chip) => (
-        <SearchPill key={chip.label} {...chip} onClick={onKeyword} hot />
+        <SearchPill key={chip.label} {...chip} selected={selectedKeyword === chip.label} onClick={onKeyword} hot />
       ))}
 
       <button
@@ -834,12 +842,16 @@ function SearchKeywordPage({ onKeyword, onSimilar }) {
   );
 }
 
-function SearchPill({ label, x, y, hot = false, onClick }) {
+function SearchPill({ label, x, y, hot = false, selected = false, onClick }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => onClick(label)}
       className={`absolute flex h-[34px] items-center justify-center rounded-[18px] px-[16px] pb-[1px] text-[13px] leading-[15px] ${
-        hot ? "bg-[#e8ffe9] text-[#008407]" : "border border-[#f1f1f1] bg-white text-[#4b4b4b]"
+        selected
+          ? "border-2 border-[#008407] bg-[#e8ffe9] text-[#008407]"
+          : hot
+            ? "bg-[#e8ffe9] text-[#008407]"
+            : "border border-[#f1f1f1] bg-white text-[#4b4b4b]"
       }`}
       style={{ left: x, top: y }}
     >
@@ -849,8 +861,19 @@ function SearchPill({ label, x, y, hot = false, onClick }) {
 }
 
 function CustomSearchProductMatch({ onNext }) {
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = window.setTimeout(() => setFading(true), 1000);
+    const nextTimer = window.setTimeout(onNext, 1350);
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(nextTimer);
+    };
+  }, [onNext]);
+
   return (
-    <div className="relative h-[650px] bg-white font-body text-[#333]">
+    <div className={`relative h-[650px] bg-white font-body text-[#333] transition-opacity duration-300 ${fading ? "opacity-0" : "opacity-100"}`}>
       <button onClick={onNext} className="absolute left-[48px] top-[149px] h-[276px] w-[293px] rounded-[20px] bg-[#e8ffe9]/60">
         <span className="absolute left-[42px] top-[18px] flex h-[163px] w-[209px] items-center justify-center rounded-[10px] bg-white">
           <img src={customSearchProduct.image} alt={customSearchProduct.name} className="h-[132px] w-[170px] object-contain" />
