@@ -981,7 +981,7 @@ function ChoiceButton({ selected, onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className={`flex h-[47px] items-center justify-center gap-2 rounded-[14px] border-2 text-[15px] font-bold ${
+      className={`mx-auto flex h-[47px] w-[188px] items-center justify-center gap-2 rounded-[14px] border-2 text-[15px] font-bold whitespace-nowrap ${
         selected ? "border-[#008407] bg-[#e8ffe9] text-[#333]" : "border-[#008407] bg-white text-[#333]"
       }`}
     >
