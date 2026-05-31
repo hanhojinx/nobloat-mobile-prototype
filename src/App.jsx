@@ -23,6 +23,31 @@ import {
 
 const asset = (path) => `/assets/${path}`;
 
+const heroPromos = [
+  {
+    title: "Today’s Sale",
+    subtitle: "60% Sale in Maximum",
+    image: asset("home/todays-sale.png")
+  },
+  {
+    title: "Gluten-free Snacks",
+    subtitle: "No Need to Worries!",
+    image: asset("home/hero-02-a.png")
+  },
+  {
+    title: "Brown Rice Product",
+    subtitle: "Domestic Ingrediants",
+    image: asset("home/hero-03-a.png"),
+    caption: "First Purchase to Get Reward!"
+  },
+  {
+    title: "Lacto-free Milk",
+    subtitle: "Famous and Credible",
+    image: asset("home/hero-04-a.png"),
+    caption: "Certified Product"
+  }
+];
+
 const products = [
   {
     id: 1,
@@ -539,25 +564,88 @@ function BottomNav({ activeTab, onTabChange }) {
 }
 
 function HomeScreen({ products, onOpenProduct, onToast }) {
+  const bestProducts = products.slice(0, 9);
+  const recommendedProducts = products.slice(9, 18);
+
   return (
-    <div className="bg-white px-[20px] pt-[20px]">
-      <div className="mb-[28px] flex justify-around text-[17px]">
+    <div className="font-body bg-white pt-[20px]">
+      <div className="mx-auto flex w-[238px] justify-between text-[17px]">
         <button className="text-[#008407]">Trusty Meal</button>
         <button className="text-[#9e9ba0]">Trusty Feed</button>
       </div>
-      <SectionTitle title="Exclusive Lacto-free Products" subtitle="New Products Only on TrustyMeal" />
-      <div className="mt-[18px] grid grid-cols-2 gap-x-[29px] gap-y-[14px]">
+      <HomeHeroCarousel promos={heroPromos} />
+      <HomeProductSection
+        title="Best Products"
+        subtitle="From Daily Best to Monthly Best"
+        products={bestProducts}
+        onOpenProduct={onOpenProduct}
+        onToast={onToast}
+      />
+      <HomePromoBand />
+      <HomeProductSection
+        title="Recommended Products"
+        subtitle="Add to Cart to Get Cheap Items!"
+        products={recommendedProducts}
+        onOpenProduct={onOpenProduct}
+        onToast={onToast}
+        accent="purple"
+        className="mt-[71px]"
+      />
+    </div>
+  );
+}
+
+function HomeHeroCarousel({ promos }) {
+  return (
+    <section className="hide-scrollbar mt-[20px] flex snap-x gap-[12px] overflow-x-auto pl-[13px] pr-[14px]">
+      {promos.map((promo) => (
+        <article key={promo.title} className="relative h-[327px] w-[363px] flex-none snap-start overflow-hidden rounded-[10px] bg-[#008407]">
+          <img src={promo.image} alt="" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-black/10" />
+          <div className="absolute right-[15px] top-[19px] max-w-[286px] text-right font-body text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+            <p className="text-[20px] leading-[24px]">{promo.subtitle}</p>
+            <h2 className="mt-[5px] text-[29px] leading-[35px]">{promo.title}</h2>
+            {promo.caption && <p className="mt-[1px] text-[17px] leading-[20px]">{promo.caption}</p>}
+          </div>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function HomeProductSection({ title, subtitle, products, onOpenProduct, onToast, accent = "green", className = "mt-[54px]" }) {
+  return (
+    <section className={className}>
+      <div className="flex items-start justify-between px-[14px]">
+        <div>
+          <h2 className="text-[17px] leading-[20px] text-[#404040]">{title}</h2>
+          <p className="mt-[6px] text-[13px] leading-[16px] text-[#a3a3a3]">{subtitle}</p>
+        </div>
+        <button className={`mt-[1px] flex items-center gap-[3px] text-[11px] ${accent === "purple" ? "text-[#6b008d]" : "text-[#008407]"}`}>
+          View All
+          <ChevronRight size={11} strokeWidth={2} />
+        </button>
+      </div>
+      <div className="hide-scrollbar mt-[23px] flex gap-[8px] overflow-x-auto pl-[15px] pr-[14px]">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} onOpenProduct={onOpenProduct} onToast={onToast} />
         ))}
       </div>
-    </div>
+    </section>
+  );
+}
+
+function HomePromoBand() {
+  return (
+    <section className="mt-[46px] h-[81px] overflow-hidden">
+      <img src={asset("home/home-banner.png")} alt="" className="h-full w-full object-cover" />
+    </section>
   );
 }
 
 function ProductCard({ product, onOpenProduct, onToast }) {
   return (
-    <article className="w-[148px]">
+    <article className="w-[148px] flex-none">
       <button onClick={() => onOpenProduct(product)} className="block w-full text-left">
         <img
           src={product.image}
