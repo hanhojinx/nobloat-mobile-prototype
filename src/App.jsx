@@ -410,6 +410,26 @@ const deliverySections = [
   }
 ];
 
+const categoryMainRows = [
+  { label: "Vegetables", Icon: Droplet },
+  { label: "Fruit", Icon: CircleCheck },
+  { label: "Seafood · Dried Seafood", Icon: Package },
+  { label: "Meat · Eggs", Icon: Heart },
+  { label: "Soups · Sides · Mains", Icon: Utensils },
+  { label: "Ready Meals · Meal Kits · Salads", Icon: Popcorn },
+  { label: "Rice · Grains", Icon: ListFilter },
+  { label: "Sauces · Oils", Icon: Bookmark },
+  { label: "Water · Drinks · Coffee · Tea", Icon: Coffee },
+  { label: "Bakery · Snacks · Rice Cakes", Icon: Croissant },
+  { label: "Dairy", Icon: PackageCheck },
+  { label: "Home & Living", Icon: Home },
+  { label: "Pets", Icon: UserRound },
+  { label: "NoBloat Only", logo: true },
+  { label: "NoBloat Made", logo: true },
+  { label: "Vegan", Icon: Droplet },
+  { label: "Bulk Size", Icon: Package }
+];
+
 const myPageSections = [
   {
     id: "gluten",
@@ -464,6 +484,7 @@ function formatPrice(price) {
 
 function App() {
   const [stage, setStage] = useState("splash");
+  const [splashFading, setSplashFading] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [onboardingChoices, setOnboardingChoices] = useState({
     intolerance: "Gluten intolerance",
@@ -477,10 +498,15 @@ function App() {
   const [toast, setToast] = useState("");
   const [modal, setModal] = useState(null);
   const [modalProduct, setModalProduct] = useState(null);
+  const [homeResetToken, setHomeResetToken] = useState(0);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setStage("onboarding"), 1000);
-    return () => window.clearTimeout(timer);
+    const fadeTimer = window.setTimeout(() => setSplashFading(true), 2000);
+    const stageTimer = window.setTimeout(() => setStage("onboarding"), 2500);
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(stageTimer);
+    };
   }, []);
 
   function showToast(message) {
@@ -505,11 +531,23 @@ function App() {
     setSelectedProduct(null);
     setReviewStep(0);
     setMyDetailOpen(false);
+    if (tab === "home") setHomeResetToken((token) => token + 1);
+  }
+
+  function goHome() {
+    setStage("app");
+    setActiveTab("home");
+    setSelectedProduct(null);
+    setReviewStep(0);
+    setMyDetailOpen(false);
+    setModal(null);
+    setModalProduct(null);
+    setHomeResetToken((token) => token + 1);
   }
 
   let content;
   if (stage === "splash") {
-    content = <SplashScreen />;
+    content = <SplashScreen fading={splashFading} />;
   } else if (stage === "onboarding") {
     content = (
       <Onboarding
@@ -547,8 +585,14 @@ function App() {
     );
   } else {
     content = (
-      <AppShell activeTab={activeTab} onTabChange={handleTabChange} onCart={() => setModal("cart")}>
-        {activeTab === "home" && <HomeScreen products={products} onOpenProduct={openProduct} onToast={showToast} />}
+      <AppShell
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        onCart={() => setModal("cart")}
+        onLogoClick={goHome}
+        onNotification={() => setReviewStep(1)}
+      >
+        {activeTab === "home" && <HomeScreen key={homeResetToken} products={products} onOpenProduct={openProduct} onToast={showToast} />}
         {activeTab === "delivery" && <DeliveryScreen onToast={showToast} onReview={() => setReviewStep(1)} onDate={() => setModal("date")} />}
         {activeTab === "category" && <CategoryScreen products={products} onOpenProduct={openProduct} onToast={showToast} />}
         {activeTab === "search" && <SearchScreen onToast={showToast} onBuy={openBuyModal} />}
@@ -580,9 +624,9 @@ function App() {
   );
 }
 
-function SplashScreen() {
+function SplashScreen({ fading }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center bg-[#008407] text-white">
+    <div className={`flex h-full flex-col items-center justify-center bg-[#008407] text-white transition-opacity duration-500 ${fading ? "opacity-0" : "opacity-100"}`}>
       <div className="rounded-[10px] bg-white/15 px-14 py-4">
         <Logo className="text-[28px]" />
       </div>
@@ -593,7 +637,7 @@ function SplashScreen() {
 }
 
 function Onboarding({ step, choices, onSelect, onNext }) {
-  const typeOptions = ["Gluten intolerance", "Both", "Lactose intolerance"];
+  const typeOptions = ["Gluten intolerance", "Lactose intolerance", "Both"];
   const severityOptions = ["Mild", "Moderate", "Severe"];
   const causeOptions = [
     { label: "Cafe", icon: Coffee },
@@ -700,22 +744,35 @@ function Onboarding({ step, choices, onSelect, onNext }) {
   );
 }
 
-function AppShell({ children, activeTab, onTabChange, onCart }) {
+function AppShell({ children, activeTab, onTabChange, onCart, onLogoClick, onNotification }) {
   return (
     <div className="flex h-full flex-col bg-white">
-      <TopBar onCart={onCart} />
+      <TopBar activeTab={activeTab} onCart={onCart} onLogoClick={onLogoClick} onNotification={onNotification} />
       <div className="hide-scrollbar flex-1 overflow-y-auto pb-[112px]">{children}</div>
       <BottomNav activeTab={activeTab} onTabChange={onTabChange} />
     </div>
   );
 }
 
-function TopBar({ onCart }) {
+function TopBar({ activeTab, onCart, onLogoClick, onNotification }) {
+  if (activeTab === "category") {
+    return (
+      <header className="relative flex h-[97px] items-end justify-center bg-[#008407] px-[21px] pb-[18px] text-white">
+        <h1 className="font-logo text-[22px] tracking-[1.32px]">Categories</h1>
+        <IconOnly label="Cart" onClick={onCart} className="absolute bottom-[16px] right-[20px]">
+          <Package size={21} />
+        </IconOnly>
+      </header>
+    );
+  }
+
   return (
     <header className="flex h-[97px] items-end justify-between bg-[#008407] px-[21px] pb-4 text-white">
-      <Logo className="text-[22px]" />
+      <button onClick={onLogoClick} aria-label="Go to home" title="Go to home">
+        <Logo className="text-[22px]" />
+      </button>
       <div className="flex items-center gap-4">
-        <IconOnly label="Notifications">
+        <IconOnly label="Notifications" onClick={onNotification}>
           <Bell size={20} />
         </IconOnly>
         <IconOnly label="Cart" onClick={onCart}>
@@ -1117,40 +1174,35 @@ function CustomSearchPurchase({ onToast, onBuy }) {
 }
 
 function CategoryScreen({ products, onOpenProduct, onToast }) {
-  const [openCategory, setOpenCategory] = useState("milk");
-
   return (
-    <div className="px-4 py-5">
-      <h1 className="text-[19px] text-[#404040]">Categories</h1>
-      <p className="mt-1 text-[13px] text-[#a3a3a3]">Browse products by intolerance type.</p>
-      <div className="mt-6 space-y-3">
-        {categories.map((category) => {
-          const open = category.id === openCategory;
-          const categoryProducts = products.filter((product) => product.category === category.id);
-          return (
-            <section key={category.id} className="overflow-hidden rounded-[8px] border border-[#e7e7e7] bg-white">
-              <button onClick={() => setOpenCategory(open ? "" : category.id)} className="flex w-full items-center justify-between px-4 py-4 text-left">
-                <span>
-                  <span className="block text-[16px] font-semibold text-[#333]">{category.name}</span>
-                  <span className="mt-1 block text-[12px] text-[#9d9d9d]">{category.detail}</span>
-                </span>
-                <span className="flex items-center gap-2 text-[12px] text-[#008407]">
-                  {category.count}
-                  <ChevronDown className={open ? "rotate-180" : ""} size={18} />
-                </span>
-              </button>
-              {open && (
-                <div className="grid grid-cols-2 gap-x-[29px] gap-y-[14px] border-t border-[#eeeeee] bg-[#fbfbfb] px-4 py-4">
-                  {(categoryProducts.length ? categoryProducts : products.slice(0, 2)).map((product) => (
-                    <ProductCard key={product.id} product={product} onOpenProduct={onOpenProduct} onToast={onToast} />
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
-      </div>
+    <div className="relative min-h-[987px] bg-white font-body text-[#373737]">
+      <section className="absolute left-0 top-0 w-full">
+        {categoryMainRows.map((row, index) => (
+          <CategoryMainRow key={row.label} row={row} top={index * 44} onToast={onToast} />
+        ))}
+      </section>
     </div>
+  );
+}
+
+function CategoryMainRow({ row, top, onToast }) {
+  const Icon = row.Icon;
+  return (
+    <button
+      onClick={() => onToast(`${row.label} is demo-only`)}
+      className="absolute left-0 flex h-[44px] w-full items-center border-b border-[#eeeeee] bg-white text-left"
+      style={{ top }}
+    >
+      <span className="absolute left-[20px] flex h-[24px] w-[24px] items-center justify-center text-[#5f5f5f]">
+        {row.logo ? (
+          <span className="font-logo text-[10px] tracking-[0.6px] text-[#008407]">NoBloat</span>
+        ) : (
+          <Icon size={20} strokeWidth={1.25} />
+        )}
+      </span>
+      <span className={`absolute left-[56px] text-[15px] leading-[18px] ${row.logo ? "top-[14px]" : "top-[13px]"}`}>{row.label}</span>
+      <ChevronDown size={17} strokeWidth={1.4} className="absolute right-[38px] top-[14px] text-[#e0e0e0]" />
+    </button>
   );
 }
 
@@ -1855,9 +1907,9 @@ function PrimaryButton({ children, onClick, className = "" }) {
   );
 }
 
-function IconOnly({ children, label, onClick, dark = false }) {
+function IconOnly({ children, label, onClick, dark = false, className = "" }) {
   return (
-    <button aria-label={label} title={label} onClick={onClick} className={`flex h-9 w-9 items-center justify-center ${dark ? "text-[#333]" : "text-white"}`}>
+    <button aria-label={label} title={label} onClick={onClick} className={`flex h-9 w-9 items-center justify-center ${dark ? "text-[#333]" : "text-white"} ${className}`}>
       {children}
     </button>
   );
