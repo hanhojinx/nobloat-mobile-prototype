@@ -28,6 +28,53 @@ textarea {
 
 button {
   -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    scale 120ms ease,
+    translate 120ms ease,
+    filter 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    opacity 120ms ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+button:not(:disabled):active {
+  box-shadow:
+    0 7px 18px rgba(0, 132, 7, 0.16),
+    inset 0 0 0 999px rgba(0, 0, 0, 0.025);
+  filter: brightness(0.97);
+  scale: 0.975;
+  translate: 0 1px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):hover {
+    filter: brightness(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition:
+      filter 80ms ease,
+      box-shadow 80ms ease,
+      background-color 80ms ease,
+      border-color 80ms ease,
+      color 80ms ease,
+      opacity 80ms ease;
+  }
+
+  button:not(:disabled):active {
+    scale: 1;
+    translate: 0;
+  }
 }
 
 .hide-scrollbar {
